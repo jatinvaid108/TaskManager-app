@@ -1,4 +1,5 @@
 import express from 'express';
+import authRoutes from "./routes/authRoutes.js";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -27,6 +28,8 @@ app.use(
 
 // Log HTTP requests (useful for dev)
 app.use(morgan("dev"));
+
+app.use("/api/auth", authRoutes);
 
 // ---------------- TEST ROUTE ----------------
 app.get("/api/health", (req, res) => {
