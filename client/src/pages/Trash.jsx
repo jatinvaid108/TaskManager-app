@@ -29,6 +29,16 @@ export default function Trash() {
       toast.error("Failed to restore");
     }
   };
+  const handleRestoreAll = async () => {
+  try {
+    await api.put("/todos/restore-all");
+    toast.success("All tasks restored");
+    fetchTrash();
+  } catch {
+    toast.error("Failed to restore tasks");
+  }
+};
+
 
   const handlePermanentDelete = async (id) => {
     try {
@@ -40,13 +50,24 @@ export default function Trash() {
     }
   };
 
+
   useEffect(() => {
     fetchTrash();
   }, []);
 
   return (
     <DashboardLayout>
-      <h1 className="text-2xl font-semibold mb-6">Trash Bin</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Trash Bin</h1>
+        {tasks.length > 0 && (
+          <button
+            onClick={handleRestoreAll}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+          >
+            Restore All
+          </button>
+        )}
+      </div>
       {loading ? (
         <p>Loading...</p>
       ) : tasks.length === 0 ? (

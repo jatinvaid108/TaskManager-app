@@ -16,7 +16,7 @@ export default function Tasks() {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
-    const [activeFilter, setActiveFilter] = useState("all");
+    
 
     // ---------------- Fetch All Tasks ----------------
     const fetchTasks = async () => {
@@ -33,18 +33,23 @@ export default function Tasks() {
     };
 
     // ---------------- Fetch Tasks by Filter ----------------
-    const fetchTasksBy = async (filterType, value) => {
-        setLoading(true);
-        try {
-            const res = await api.get(`/todos?${filterType}=${value}`);
-            setTasks(res.data.todos);
-        } catch (err) {
-            console.error("Error filtering tasks:", err);
-            toast.error("Failed to filter tasks");
-        } finally {
-            setLoading(false);
-        }
-    };
+    const fetchTasksBy = async (filter) => {
+  setLoading(true);
+  try {
+    let url = "/todos";
+    if (filter === "completed") url = "/todos?completed=true";
+    else if (filter === "pending") url = "/todos?completed=false";
+    else if (filter === "high") url = "/todos?priority=high";
+
+    const res = await api.get(url);
+    setTasks(res.data.todos);
+  } catch {
+    toast.error("Failed to apply filter");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     // ---------------- Add or Update Task ----------------
     const handleSave = async (form) => {
@@ -126,59 +131,17 @@ export default function Tasks() {
             </div>
 
 
-            {/* ---------- 🔍 Filter Buttons ---------- */}
-            <div className="flex flex-wrap gap-3 mb-4">
-                <button
-                    onClick={() => {
-                        fetchTasks();
-                        setActiveFilter("all");
-                    }}
-                    className={`px-3 py-1.5 rounded ${activeFilter === "all"
-                        ? "bg-gray-300"
-                        : "bg-gray-200 hover:bg-gray-300"
-                        }`}
+            {/* ---------- 🔍 Filter Select (mobile-friendly) ---------- */}
+            <div className="mb-4 flex items-center gap-3">
+                <select
+                    onChange={(e) => fetchTasksBy(e.target.value)}
+                    className="border border-gray-300 rounded px-3 py-2 focus:outline-primary"
                 >
-                    All
-                </button>
-
-                <button
-                    onClick={() => {
-                        fetchTasksBy("completed", true);
-                        setActiveFilter("completed");
-                    }}
-                    className={`px-3 py-1.5 rounded ${activeFilter === "completed"
-                        ? "bg-green-200 text-green-800"
-                        : "bg-green-100 text-green-700 hover:bg-green-200"
-                        }`}
-                >
-                    Completed
-                </button>
-
-                <button
-                    onClick={() => {
-                        fetchTasksBy("completed", false);
-                        setActiveFilter("pending");
-                    }}
-                    className={`px-3 py-1.5 rounded ${activeFilter === "pending"
-                        ? "bg-yellow-200 text-yellow-800"
-                        : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-                        }`}
-                >
-                    Pending
-                </button>
-
-                <button
-                    onClick={() => {
-                        fetchTasksBy("priority", "high");
-                        setActiveFilter("high");
-                    }}
-                    className={`px-3 py-1.5 rounded ${activeFilter === "high"
-                        ? "bg-red-200 text-red-800"
-                        : "bg-red-100 text-red-700 hover:bg-red-200"
-                        }`}
-                >
-                    High Priority
-                </button>
+                    <option value="all">All Tasks</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                    <option value="high">High Priority</option>
+                </select>
             </div>
 
             {/* ---------- Task List Section ---------- */}

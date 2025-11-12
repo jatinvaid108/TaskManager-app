@@ -138,3 +138,12 @@ export const markAllCompleted = async (req, res) => {
   }
 };
 
+export const restoreAll = async (req, res) => {
+  try {
+    await Todo.updateMany({ user: req.user._id, deleted: true }, { deleted: false });
+    res.json({ message: "All tasks restored" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
