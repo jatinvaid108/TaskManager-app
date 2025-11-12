@@ -22,14 +22,37 @@ export const createTodo= async(req,res)=>{
 };
 
 //Get all tasks for logged-in user (non-deleted)
+
+// export const getTodos = async (req, res) => {
+//   try {
+//     // Let MongoDB handle sorting
+//     const todos = await Todo.find({ user: req.user._id, deleted: false }).sort({ createdAt: -1 });
+    
+//     res.json({ success: true, count: todos.length, todos });
+//   } catch (err) {
+//     console.error("Error fetching todos:", err.message);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 export const getTodos = async (req, res) => {
   try {
-    // Let MongoDB handle sorting
-    const todos = await Todo.find({ user: req.user._id, deleted: false }).sort({ createdAt: -1 });
-    
-    res.json({ success: true, count: todos.length, todos });
+    const { completed, priority, page = 1, limit = 10 } = req.query;
+
+    const filter = { user: req.user._id, deleted: false };
+    if (completed) filter.completed = completed === "true";
+    if (priority) filter.priority = priority;
+
+    const skip = (page - 1) * limit;
+    const todos = await Todo.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Todo.countDocuments(filter);
+
+    res.json({ success: true, total, page: Number(page), todos });
   } catch (err) {
-    console.error("Error fetching todos:", err.message);
     res.status(500).json({ message: err.message });
   }
 };
@@ -93,27 +116,6 @@ export const deleteTodo= async(req,res)=>{
 
 
 // Filter + Pagination for user's tasks
-export const getTodos = async (req, res) => {
-  try {
-    const { completed, priority, page = 1, limit = 10 } = req.query;
-
-    const filter = { user: req.user._id, deleted: false };
-    if (completed) filter.completed = completed === "true";
-    if (priority) filter.priority = priority;
-
-    const skip = (page - 1) * limit;
-    const todos = await Todo.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
-
-    const total = await Todo.countDocuments(filter);
-
-    res.json({ success: true, total, page: Number(page), todos });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
 // Restore soft-deleted task
 export const restoreTodo = async (req, res) => {

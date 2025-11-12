@@ -1,4 +1,4 @@
-import User from "../,models/User.js";
+import User from "../models/User.js";
 import Todo from "../models/Todo.js";
 
 //Get all users
