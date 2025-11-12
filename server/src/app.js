@@ -5,6 +5,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
 import todoRoutes from "./routes/todoRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 const app=express();
 
@@ -32,6 +33,7 @@ app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ---------------- TEST ROUTE ----------------
 app.get("/api/health", (req, res) => {

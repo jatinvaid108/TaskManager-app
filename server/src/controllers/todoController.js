@@ -90,3 +90,42 @@ export const deleteTodo= async(req,res)=>{
 // Only user’s own tasks (security)
 
 // Sorted newest first (sort({ createdAt: -1 }))
+
+
+// Filter + Pagination for user's tasks
+export const getTodos = async (req, res) => {
+  try {
+    const { completed, priority, page = 1, limit = 10 } = req.query;
+
+    const filter = { user: req.user._id, deleted: false };
+    if (completed) filter.completed = completed === "true";
+    if (priority) filter.priority = priority;
+
+    const skip = (page - 1) * limit;
+    const todos = await Todo.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Todo.countDocuments(filter);
+
+    res.json({ success: true, total, page: Number(page), todos });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Restore soft-deleted task
+export const restoreTodo = async (req, res) => {
+  try {
+    const todo = await Todo.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id, deleted: true },
+      { deleted: false },
+      { new: true }
+    );
+    if (!todo) return res.status(404).json({ message: "Task not found or not deleted" });
+    res.json({ success: true, message: "Task restored", todo });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
