@@ -77,7 +77,26 @@ export default function Tasks() {
             setConfirmOpen(false);
         }
     };
-    
+
+    const handleToggleComplete = async (task) => {
+        try {
+            await api.put(`/todos/${task._id}`, { completed: !task.completed });
+            toast.success(task.completed ? "Marked as pending" : "Marked as completed");
+            fetchTasks();
+        } catch {
+            toast.error("Failed to update task status");
+        }
+    };
+    const markAllCompleted = async () => {
+        try {
+            await api.put("/todos/mark-all-completed"); // backend route
+            toast.success("All tasks marked as completed");
+            fetchTasks(); // refresh list after marking
+        } catch {
+            toast.error("Failed to mark all completed");
+        }
+    };
+
 
     // ---------------- Initial Load ----------------
     useEffect(() => {
@@ -90,16 +109,22 @@ export default function Tasks() {
             {/* ---------- Header ---------- */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-semibold">My Tasks</h1>
-                <button
-                    onClick={() => {
-                        setModalOpen(true);
-                        setSelectedTask(null);
-                    }}
-                    className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-600"
-                >
-                    <PlusCircle size={18} /> Add Task
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={markAllCompleted}
+                        className="border border-primary text-primary px-3 py-2 rounded-lg hover:bg-indigo-50"
+                    >
+                        Mark All Completed
+                    </button>
+                    <button
+                        onClick={() => { setModalOpen(true); setSelectedTask(null); }}
+                        className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-600"
+                    >
+                        + Add Task
+                    </button>
+                </div>
             </div>
+
 
             {/* ---------- 🔍 Filter Buttons ---------- */}
             <div className="flex flex-wrap gap-3 mb-4">
@@ -109,8 +134,8 @@ export default function Tasks() {
                         setActiveFilter("all");
                     }}
                     className={`px-3 py-1.5 rounded ${activeFilter === "all"
-                            ? "bg-gray-300"
-                            : "bg-gray-200 hover:bg-gray-300"
+                        ? "bg-gray-300"
+                        : "bg-gray-200 hover:bg-gray-300"
                         }`}
                 >
                     All
@@ -122,8 +147,8 @@ export default function Tasks() {
                         setActiveFilter("completed");
                     }}
                     className={`px-3 py-1.5 rounded ${activeFilter === "completed"
-                            ? "bg-green-200 text-green-800"
-                            : "bg-green-100 text-green-700 hover:bg-green-200"
+                        ? "bg-green-200 text-green-800"
+                        : "bg-green-100 text-green-700 hover:bg-green-200"
                         }`}
                 >
                     Completed
@@ -135,8 +160,8 @@ export default function Tasks() {
                         setActiveFilter("pending");
                     }}
                     className={`px-3 py-1.5 rounded ${activeFilter === "pending"
-                            ? "bg-yellow-200 text-yellow-800"
-                            : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+                        ? "bg-yellow-200 text-yellow-800"
+                        : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
                         }`}
                 >
                     Pending
@@ -148,8 +173,8 @@ export default function Tasks() {
                         setActiveFilter("high");
                     }}
                     className={`px-3 py-1.5 rounded ${activeFilter === "high"
-                            ? "bg-red-200 text-red-800"
-                            : "bg-red-100 text-red-700 hover:bg-red-200"
+                        ? "bg-red-200 text-red-800"
+                        : "bg-red-100 text-red-700 hover:bg-red-200"
                         }`}
                 >
                     High Priority

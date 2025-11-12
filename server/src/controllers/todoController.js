@@ -37,25 +37,22 @@ export const createTodo= async(req,res)=>{
 
 export const getTodos = async (req, res) => {
   try {
-    const { completed, priority, page = 1, limit = 10 } = req.query;
+    const { completed, priority, deleted } = req.query;
 
-    const filter = { user: req.user._id, deleted: false };
-    if (completed) filter.completed = completed === "true";
+    const filter = { user: req.user._id };
+    if (deleted === "true") filter.deleted = true;
+    else filter.deleted = false; // default
+
+    if (completed !== undefined) filter.completed = completed === "true";
     if (priority) filter.priority = priority;
 
-    const skip = (page - 1) * limit;
-    const todos = await Todo.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
-
-    const total = await Todo.countDocuments(filter);
-
-    res.json({ success: true, total, page: Number(page), todos });
+    const todos = await Todo.find(filter).sort({ createdAt: -1 });
+    res.json({ success: true, count: todos.length, todos });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 //GET single task by ID
@@ -131,3 +128,13 @@ export const restoreTodo = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const markAllCompleted = async (req, res) => {
+  try {
+    await Todo.updateMany({ user: req.user._id, deleted: false }, { completed: true });
+    res.json({ message: "All tasks marked as completed" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+

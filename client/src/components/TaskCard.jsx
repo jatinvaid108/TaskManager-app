@@ -1,14 +1,15 @@
-import { Edit2, Trash2, CheckCircle2, Clock } from "lucide-react";
+import { Edit2, Trash2, CheckCircle2, Circle } from "lucide-react";
 
 export default function TaskCard({ task, onEdit, onDelete, onToggleComplete }) {
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex justify-between items-center">
       <div className="flex items-start gap-3">
+        {/*  Toggle Complete Button */}
         <button onClick={() => onToggleComplete(task)} className="mt-1">
           {task.completed ? (
-            <CheckCircle2 className="text-green-500" size={20} />
+            <CheckCircle2 className="text-green-500" size={22} />
           ) : (
-            <Clock className="text-yellow-500" size={20} />
+            <Circle className="text-gray-400 hover:text-green-500" size={22} />
           )}
         </button>
 
