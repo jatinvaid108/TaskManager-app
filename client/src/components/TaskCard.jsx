@@ -1,14 +1,17 @@
 import { Edit2, Trash2, CheckCircle2, Clock } from "lucide-react";
 
-export default function TaskCard({ task, onEdit, onDelete }) {
+export default function TaskCard({ task, onEdit, onDelete, onToggleComplete }) {
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex justify-between items-center">
       <div className="flex items-start gap-3">
-        {task.completed ? (
-          <CheckCircle2 className="text-green-500 mt-1" size={20} />
-        ) : (
-          <Clock className="text-yellow-500 mt-1" size={20} />
-        )}
+        <button onClick={() => onToggleComplete(task)} className="mt-1">
+          {task.completed ? (
+            <CheckCircle2 className="text-green-500" size={20} />
+          ) : (
+            <Clock className="text-yellow-500" size={20} />
+          )}
+        </button>
+
         <div>
           <h3
             className={`text-lg font-semibold ${
@@ -25,11 +28,18 @@ export default function TaskCard({ task, onEdit, onDelete }) {
           </p>
         </div>
       </div>
+
       <div className="flex gap-3">
-        <button onClick={() => onEdit(task)} className="text-blue-600 hover:text-blue-800">
+        <button
+          onClick={() => onEdit(task)}
+          className="text-blue-600 hover:text-blue-800"
+        >
           <Edit2 size={18} />
         </button>
-        <button onClick={() => onDelete(task._id)} className="text-red-600 hover:text-red-800">
+        <button
+          onClick={() => onDelete(task._id)}
+          className="text-red-600 hover:text-red-800"
+        >
           <Trash2 size={18} />
         </button>
       </div>
