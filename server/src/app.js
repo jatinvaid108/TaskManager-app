@@ -1,9 +1,10 @@
 import express from 'express';
-import authRoutes from "./routes/authRoutes.js";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import authRoutes from "./routes/authRoutes.js";
+import todoRoutes from "./routes/todoRoutes.js";
 
 const app=express();
 
@@ -30,6 +31,7 @@ app.use(
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/todos", todoRoutes);
 
 // ---------------- TEST ROUTE ----------------
 app.get("/api/health", (req, res) => {

@@ -22,15 +22,18 @@ export const createTodo= async(req,res)=>{
 };
 
 //Get all tasks for logged-in user (non-deleted)
-export const getTodos=async (req,res)=>{
-    try{
-        const todos=(await Todo.find({user: req.user._id, deleted: false})).toSorted({createdAt: -1});
-        res.json({success: true, count: todos.length, todos});
-    }
-    catch(err){
-        res.status(500).json({message: err.message});
-    }
+export const getTodos = async (req, res) => {
+  try {
+    // Let MongoDB handle sorting
+    const todos = await Todo.find({ user: req.user._id, deleted: false }).sort({ createdAt: -1 });
+    
+    res.json({ success: true, count: todos.length, todos });
+  } catch (err) {
+    console.error("Error fetching todos:", err.message);
+    res.status(500).json({ message: err.message });
+  }
 };
+
 
 //GET single task by ID
 export const getTodoById= async(req,res)=>{
