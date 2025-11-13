@@ -1,17 +1,27 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
-import { getAllUsers, deleteUser, getAllTasks, hardDeleteTask } from "../controllers/adminController.js";
+
+import {
+  getAllUsers,
+  deleteUser,
+  getAllTasks,
+  hardDeleteTask,
+  getSystemStats
+} from "../controllers/adminController.js";
 
 const router = express.Router();
 
-// All admin routes require both protect + adminOnly
 router.use(protect, adminOnly);
 
+// User Management
 router.get("/users", getAllUsers);
 router.delete("/users/:id", deleteUser);
+
+// Task Management
 router.get("/tasks", getAllTasks);
 router.delete("/tasks/:id", hardDeleteTask);
 
+// System Stats
+router.get("/stats", getSystemStats);
+
 export default router;
-
-
