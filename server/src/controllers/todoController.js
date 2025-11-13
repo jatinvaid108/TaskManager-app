@@ -37,21 +37,63 @@ export const createTodo= async(req,res)=>{
 
 export const getTodos = async (req, res) => {
   try {
-    const { completed, priority, deleted } = req.query;
+    const { completed, priority, deleted, search, sort } = req.query;
 
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Base filter → always for logged-in user
     const filter = { user: req.user._id };
-    if (deleted === "true") filter.deleted = true;
-    else filter.deleted = false; // default
 
-    if (completed !== undefined) filter.completed = completed === "true";
+    // Filter by deleted or not
+    if (deleted === "true") filter.deleted = true;
+    else filter.deleted = false;
+
+    // Filter by completion
+    if (completed !== undefined)
+      filter.completed = completed === "true";
+
+    // Filter by priority
     if (priority) filter.priority = priority;
 
-    const todos = await Todo.find(filter).sort({ createdAt: -1 });
-    res.json({ success: true, count: todos.length, todos });
+    // Search in title or description
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    // Sorting
+    let sortQuery = { createdAt: -1 }; // default
+    if (sort === "priority") sortQuery = { priority: 1 };
+    if (sort === "dueDate") sortQuery = { dueDate: 1 };
+    if (sort === "title") sortQuery = { title: 1 };
+
+    // Fetch tasks
+    const tasks = await Todo.find(filter)
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit);
+
+    // Total count for pagination
+    const total = await Todo.countDocuments(filter);
+
+    res.json({
+      success: true,
+      page,
+      totalPages: Math.ceil(total / limit),
+      limit,
+      total,
+      tasks
+    });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 

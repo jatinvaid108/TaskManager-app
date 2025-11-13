@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
 import todoRoutes from "./routes/todoRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 const app=express();
 
@@ -34,6 +35,7 @@ app.use(morgan("dev"));
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // ---------------- TEST ROUTE ----------------
 app.get("/api/health", (req, res) => {
