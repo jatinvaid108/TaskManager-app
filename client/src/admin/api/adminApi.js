@@ -28,3 +28,28 @@ export const hardDeleteTask = async (id) => {
   const res = await api.delete(`/admin/tasks/${id}`);
   return res.data;
 };
+
+
+// Analytics: tasks created per day
+export const getTasksPerDay = async () => {
+  const res = await api.get("/analytics/tasks/daily");
+  return res.data.data;
+};
+
+// Analytics: completion stats
+export const getCompletionStats = async () => {
+  const res = await api.get("/analytics/tasks/completion");
+  return res.data.data;
+};
+
+// Analytics: priority stats
+export const getPriorityStats = async () => {
+  const res = await api.get("/analytics/tasks/priority");
+  return res.data.data;
+};
+
+// Analytics: user growth over time
+export const getUserGrowth = async () => {
+  const res = await api.get("/analytics/users/growth");
+  return res.data.data;
+};
