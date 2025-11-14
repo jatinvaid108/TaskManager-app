@@ -1,11 +1,9 @@
-import React from 'react'
+import AdminLayout from "../components/AdminLayout";
 
-const AdminAnalytics = () => {
+export default function AdminAnalytics() {
   return (
-    <div>
-      
-    </div>
-  )
+    <AdminLayout>
+      <h2 className="text-2xl font-semibold mb-4">Analytics</h2>
+    </AdminLayout>
+  );
 }
-
-export default AdminAnalytics

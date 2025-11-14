@@ -1,11 +1,9 @@
-import React from 'react'
+import AdminLayout from "../components/AdminLayout";
 
-const AdminUsers = () => {
+export default function AdminUsers() {
   return (
-    <div>
-      
-    </div>
-  )
+    <AdminLayout>
+      <h2 className="text-2xl font-semibold mb-4">Users Management</h2>
+    </AdminLayout>
+  );
 }
-
-export default AdminUsers

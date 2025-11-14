@@ -1,11 +1,9 @@
-import React from 'react'
+import AdminLayout from "../components/AdminLayout";
 
-const AdminTasks = () => {
+export default function AdminTasks() {
   return (
-    <div>
-      
-    </div>
-  )
+    <AdminLayout>
+      <h2 className="text-2xl font-semibold mb-4">Tasks Management</h2>
+    </AdminLayout>
+  );
 }
-
-export default AdminTasks
