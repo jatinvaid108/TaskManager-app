@@ -10,6 +10,8 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 // ---------------- MIDDLEWARES ----------------
 // Parses incoming JSON data
+const app = express();
+
 app.use(express.json());
 
 // Parse cookies sent from client

@@ -14,20 +14,31 @@ export default function Login() {
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await api.post("/auth/login", form);
-      setUser(res.data.user);
-      toast.success(`Welcome back, ${res.data.user.name}!`);
+ const handleSubmit = async e => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const res = await api.post("/auth/login", form);
+
+    setUser(res.data.user);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+
+    toast.success(`Welcome back, ${res.data.user.name}!`);
+
+    if (res.data.user.role === "admin") {
+      navigate("/admin");
+    } else {
       navigate("/dashboard");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
     }
-  };
+
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-teal-50">

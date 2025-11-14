@@ -8,181 +8,184 @@ import toast from "react-hot-toast";
 import { PlusCircle } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 
-
 export default function Tasks() {
-    const [tasks, setTasks] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const [selectedTask, setSelectedTask] = useState(null);
-    const [deleteId, setDeleteId] = useState(null);
-    
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
 
-    // ---------------- Fetch All Tasks ----------------
-    const fetchTasks = async () => {
-        setLoading(true);
-        try {
-            const res = await api.get("/todos");
-            setTasks(res.data.todos);
-        } catch (err) {
-            console.error("Error fetching todos:", err);
-            toast.error("Failed to fetch tasks");
-        } finally {
-            setLoading(false);
-        }
-    };
+  // ---------------- Fetch All Tasks ----------------
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("/todos");
+      setTasks(res.data.tasks || []);
+    } catch (err) {
+      console.error("Error fetching todos:", err);
+      toast.error("Failed to fetch tasks");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // ---------------- Fetch Tasks by Filter ----------------
-    const fetchTasksBy = async (filter) => {
-  setLoading(true);
-  try {
-    let url = "/todos";
-    if (filter === "completed") url = "/todos?completed=true";
-    else if (filter === "pending") url = "/todos?completed=false";
-    else if (filter === "high") url = "/todos?priority=high";
+  // ---------------- Fetch Tasks by Filter ----------------
+  const fetchTasksBy = async (filter) => {
+    setLoading(true);
+    try {
+      let url = "/todos";
 
-    const res = await api.get(url);
-    setTasks(res.data.todos);
-  } catch {
-    toast.error("Failed to apply filter");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (filter === "completed") url = "/todos?completed=true";
+      else if (filter === "pending") url = "/todos?completed=false";
+      else if (filter === "high") url = "/todos?priority=high";
 
+      const res = await api.get(url);
+      setTasks(res.data.tasks || []);
+    } catch {
+      toast.error("Failed to apply filter");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // ---------------- Add or Update Task ----------------
-    const handleSave = async (form) => {
-        try {
-            if (selectedTask) {
-                await api.put(`/todos/${selectedTask._id}`, form);
-                toast.success("Task updated");
-            } else {
-                await api.post("/todos", form);
-                toast.success("Task added");
-            }
-            fetchTasks();
-            setModalOpen(false);
-        } catch (err) {
-            console.error("Error saving the task:", err);
-            toast.error("Error saving task");
-        }
-    };
+  // ---------------- Add or Update Task ----------------
+  const handleSave = async (form) => {
+    try {
+      if (selectedTask) {
+        await api.put(`/todos/${selectedTask._id}`, form);
+        toast.success("Task updated");
+      } else {
+        await api.post("/todos", form);
+        toast.success("Task added");
+      }
+      fetchTasks();
+      setModalOpen(false);
+    } catch (err) {
+      console.error("Error saving task:", err);
+      toast.error("Error saving task");
+    }
+  };
 
-    // ---------------- Delete Task ----------------
-    const handleDelete = async () => {
-        try {
-            await api.delete(`/todos/${deleteId}`);
-            toast.success("Task moved to Trash");
-            fetchTasks();
-        } catch (err) {
-            console.error("Error deleting task:", err);
-            toast.error("Failed to delete task");
-        } finally {
-            setConfirmOpen(false);
-        }
-    };
+  // ---------------- Delete Task ----------------
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/todos/${deleteId}`);
+      toast.success("Task moved to Trash");
+      fetchTasks();
+    } catch (err) {
+      console.error("Error deleting task:", err);
+      toast.error("Failed to delete task");
+    } finally {
+      setConfirmOpen(false);
+    }
+  };
 
-    const handleToggleComplete = async (task) => {
-        try {
-            await api.put(`/todos/${task._id}`, { completed: !task.completed });
-            toast.success(task.completed ? "Marked as pending" : "Marked as completed");
-            fetchTasks();
-        } catch {
-            toast.error("Failed to update task status");
-        }
-    };
-    const markAllCompleted = async () => {
-        try {
-            await api.put("/todos/mark-all-completed"); // backend route
-            toast.success("All tasks marked as completed");
-            fetchTasks(); // refresh list after marking
-        } catch {
-            toast.error("Failed to mark all completed");
-        }
-    };
+  // ---------------- Toggle Complete ----------------
+  const handleToggleComplete = async (task) => {
+    try {
+      await api.put(`/todos/${task._id}`, { completed: !task.completed });
+      toast.success(task.completed ? "Marked as pending" : "Task completed!");
+      fetchTasks();
+    } catch {
+      toast.error("Failed to update status");
+    }
+  };
 
+  // ---------------- Mark All Completed ----------------
+  const markAllCompleted = async () => {
+    try {
+      await api.put("/todos/mark-all-completed");
+      toast.success("All tasks marked as completed");
+      fetchTasks();
+    } catch {
+      toast.error("Failed to mark all as completed");
+    }
+  };
 
-    // ---------------- Initial Load ----------------
-    useEffect(() => {
-        fetchTasks();
-    }, []);
+  // ---------------- Initial Load ----------------
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
-    // ---------------- Render ----------------
-    return (
-        <DashboardLayout>
-            {/* ---------- Header ---------- */}
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold">My Tasks</h1>
-                <div className="flex gap-3">
-                    <button
-                        onClick={markAllCompleted}
-                        className="border border-primary text-primary px-3 py-2 rounded-lg hover:bg-indigo-50"
-                    >
-                        Mark All Completed
-                    </button>
-                    <button
-                        onClick={() => { setModalOpen(true); setSelectedTask(null); }}
-                        className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-600"
-                    >
-                        + Add Task
-                    </button>
-                </div>
-            </div>
+  return (
+    <DashboardLayout>
+      {/* ---------- Header ---------- */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">My Tasks</h1>
+        <div className="flex gap-3">
+          <button
+            onClick={markAllCompleted}
+            className="border border-primary text-primary px-3 py-2 rounded-lg hover:bg-indigo-50"
+          >
+            Mark All Completed
+          </button>
 
+          <button
+            onClick={() => {
+              setModalOpen(true);
+              setSelectedTask(null);
+            }}
+            className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-600"
+          >
+            <PlusCircle size={18} /> Add Task
+          </button>
+        </div>
+      </div>
 
-            {/* ---------- 🔍 Filter Select (mobile-friendly) ---------- */}
-            <div className="mb-4 flex items-center gap-3">
-                <select
-                    onChange={(e) => fetchTasksBy(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 focus:outline-primary"
-                >
-                    <option value="all">All Tasks</option>
-                    <option value="completed">Completed</option>
-                    <option value="pending">Pending</option>
-                    <option value="high">High Priority</option>
-                </select>
-            </div>
+      {/* ---------- Filters ---------- */}
+      <div className="mb-4 flex items-center gap-3">
+        <select
+          onChange={(e) => fetchTasksBy(e.target.value)}
+          className="border border-gray-300 rounded px-3 py-2 focus:outline-primary"
+        >
+          <option value="all">All Tasks</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="high">High Priority</option>
+        </select>
+      </div>
 
-            {/* ---------- Task List Section ---------- */}
-            {loading ? (
-                <div className="flex justify-center mt-10">
-                    {/* Spinner centered */}
-                    {/* <ClipLoader color="#6366F1" size={40} /> */}
-                    <ClipLoader color="var(--color-primary)" size={40} />
-                </div>
-            ) : tasks.length === 0 ? (
-                <p className="text-gray-500 text-center mt-10">
-                    No tasks found.
-                </p>
-            ) : (
-                <div className="space-y-3">
-                    {tasks.map((task) => (
-                        <TaskCard
-                            key={task._id}
-                            task={task}
-                            onEdit={(t) => { setSelectedTask(t); setModalOpen(true); }}
-                            onDelete={(id) => { setDeleteId(id); setConfirmOpen(true); }}
-                            onToggleComplete={handleToggleComplete}
-                        />
-
-                    ))}
-                </div>
-            )}
-
-            {/* ---------- Modals ---------- */}
-            <TaskModal
-                isOpen={modalOpen}
-                onClose={() => setModalOpen(false)}
-                onSave={handleSave}
-                existingTask={selectedTask}
+      {/* ---------- Task List Section ---------- */}
+      {loading ? (
+        <div className="flex justify-center mt-10">
+          <ClipLoader color="#6366F1" size={40} />
+        </div>
+      ) : (tasks || []).length === 0 ? (
+        <p className="text-gray-500 text-center mt-10">No tasks found.</p>
+      ) : (
+        <div className="space-y-3">
+          {(tasks || []).map((task) => (
+            <TaskCard
+              key={task._id}
+              task={task}
+              onEdit={(t) => {
+                setSelectedTask(t);
+                setModalOpen(true);
+              }}
+              onDelete={(id) => {
+                setDeleteId(id);
+                setConfirmOpen(true);
+              }}
+              onToggleComplete={handleToggleComplete}
             />
+          ))}
+        </div>
+      )}
 
-            <ConfirmModal
-                isOpen={confirmOpen}
-                onClose={() => setConfirmOpen(false)}
-                onConfirm={handleDelete}
-            />
-        </DashboardLayout>
-    );
+      {/* ---------- Modals ---------- */}
+      <TaskModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+        existingTask={selectedTask}
+      />
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+      />
+    </DashboardLayout>
+  );
 }
