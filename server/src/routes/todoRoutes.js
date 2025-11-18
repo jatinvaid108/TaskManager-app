@@ -1,5 +1,5 @@
 import express from "express";
-import { createTodo, getTodos, getTodoById, updateTodo, deleteTodo, restoreTodo, markAllCompleted,restoreAll } from "../controllers/todoController.js";
+import { createTodo, getTodos, getTodoById, updateTodo, deleteTodo, restoreTodo, markAllCompleted,restoreAll,assignTask,unassignTask } from "../controllers/todoController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router=express.Router();
@@ -16,6 +16,9 @@ router.delete("/:id",deleteTodo);     // soft delete task
 router.put("/restore/:id", restoreTodo);
 router.put("/mark-all-completed", protect, markAllCompleted); //extra frontend button
 router.put("/restore-all", protect, restoreAll);
+router.put("/:id/assign", protect, assignTask);
+router.put("/:id/unassign", protect, unassignTask);
+
 
 
 export default router;

@@ -10,6 +10,11 @@ const todoSchema= new mongoose.Schema(
         completed: {type: Boolean, default: false},
         deleted:{ type: Boolean, default: false},  //soft delete
 
+        // Team & Assignment fields
+        team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null },
+        assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+        assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+
         sharedWith: [{type: mongoose.Schema.Types.ObjectId, ref:"User"}]  //Future Collab
     },
     {timestamps: true}

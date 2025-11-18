@@ -189,3 +189,47 @@ export const restoreAll = async (req, res) => {
   }
 };
 
+
+// -------------------------------------------------------------------> New Team collab Feature
+// Assign task to a user (only team members or task owner)
+export const assignTask = async (req, res) => {
+  try {
+    const { id } = req.params; // todo id
+    const { assignedTo } = req.body; // user id to assign
+
+    const todo = await Todo.findById(id);
+    if (!todo) return res.status(404).json({ message: "Task not found" });
+
+    // if task has team, ensure assignee is member of that team
+    if (todo.team) {
+      const Team = await import("../models/Team.js").then(m => m.default);
+      const team = await Team.findById(todo.team);
+      const isMember = team.members.some(m => m.user.toString() === assignedTo);
+      if (!isMember) return res.status(400).json({ message: "Assignee is not a team member" });
+    }
+
+    todo.assignedTo = assignedTo;
+    todo.assignedBy = req.user._id;
+    await todo.save();
+    await todo.populate("assignedTo", "name email");
+    res.json({ success: true, todo });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Unassign
+export const unassignTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const todo = await Todo.findById(id);
+    if (!todo) return res.status(404).json({ message: "Task not found" });
+
+    todo.assignedTo = null;
+    todo.assignedBy = null;
+    await todo.save();
+    res.json({ success: true, todo });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

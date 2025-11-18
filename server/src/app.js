@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import todoRoutes from "./routes/todoRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import teamRoutes from "./routes/teamRoutes.js";
 
 // ---------------- MIDDLEWARES ----------------
 // Parses incoming JSON data
@@ -19,6 +20,8 @@ app.use(cookieParser());
 
 // Add common security headers
 app.use(helmet());
+app.use("/api/teams", teamRoutes);
+
 
 // Enable CORS so frontend can access backend
 app.use(
