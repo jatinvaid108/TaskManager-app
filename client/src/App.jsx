@@ -15,6 +15,9 @@ import AdminUsers from "./admin/pages/AdminUsers";
 import AdminTasks from "./admin/pages/AdminTasks";
 import AdminAnalytics from "./admin/pages/AdminAnalytics";
 
+//--------------------------------> Team Collaboration
+import TeamsPage from "./teams/pages/TeamsPage";
+
 
 function App() {
   return (
@@ -83,8 +86,9 @@ function App() {
         }
       />
 
-    </Routes>
+      <Route path="/teams" element={<ProtectedRoute><TeamsPage /></ProtectedRoute>} />
 
+    </Routes>
 
   );
 }

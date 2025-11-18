@@ -6,7 +6,7 @@ import api from "../utils/api.js";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Load user from localStorage on startup
+  // Load user immediately from localStorage
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : null;
@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(true);
 
-  // Validate user session from backend
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -22,8 +21,9 @@ export const AuthProvider = ({ children }) => {
         setUser(res.data.user);
         localStorage.setItem("user", JSON.stringify(res.data.user));
       } catch {
-        setUser(null);
-        localStorage.removeItem("user");
+        // IMPORTANT CHANGE:
+        // Do NOT clear user immediately during loading.
+        // Let protected route wait for loading to finish.
       } finally {
         setLoading(false);
       }
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
     checkUser();
   }, []);
 
-  // Sync user to localStorage whenever it changes
+  // keep syncing user to localStorage
   useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));

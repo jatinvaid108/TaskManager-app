@@ -30,3 +30,13 @@ export const leaveTeam = async (teamId) => {
   const res = await api.post(`/teams/${teamId}/leave`);
   return res.data;
 };
+
+
+
+
+// Search users by email
+export const searchUsers = async (query) => {
+  const res = await api.get(`/users/search?email=${query}`);
+  return res.data.users;
+};
+

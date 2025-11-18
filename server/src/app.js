@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+
 import authRoutes from "./routes/authRoutes.js";
 import todoRoutes from "./routes/todoRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
@@ -10,40 +11,43 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
-// ---------------- MIDDLEWARES ----------------
-// Parses incoming JSON data
 const app = express();
 
-app.use(express.json());
+// ---------------- MIDDLEWARES ----------------
 
-// Parse cookies sent from client
-app.use(cookieParser());
-
-// Add common security headers
-app.use(helmet());
-app.use("/api/teams", teamRoutes);
-
-
-// Enable CORS so frontend can access backend
+// CORS MUST BE FIRST
 app.use(
   cors({
-    origin: "http://localhost:5173", // React dev server origin
-    credentials: true, // allow sending cookies
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
 
-// Log HTTP requests (useful for dev)
+// JSON parser
+app.use(express.json());
+
+// cookie parser MUST be before protected routes
+app.use(cookieParser());
+
+// Security headers
+app.use(helmet());
+
+// Logger
 app.use(morgan("dev"));
 
+// ---------------- ROUTES ----------------
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
-app.use("/api/users", userRoutes);          //Backend search ready
+app.use("/api/teams", teamRoutes);  // ✅ MOVED HERE
+app.use("/api/users", userRoutes);
+
 // ---------------- TEST ROUTE ----------------
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "Server is healthy 💪" });
 });
 
 export default app;
-

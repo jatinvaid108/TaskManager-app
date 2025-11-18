@@ -6,7 +6,7 @@ export default function Sidebar() {
     { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={20} /> },
     { name: "Tasks", path: "/tasks", icon: <CheckSquare size={20} /> },
     { name: "Trash", path: "/trash", icon: <Trash2 size={20} /> },
-    { name: "Team", path: "/team", icon: <Users size={20} /> },
+    { name: "Team", path: "/teams", icon: <Users size={20} /> },
   ];
 
   return (
