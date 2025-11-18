@@ -1,38 +1,22 @@
 import api from "../../utils/api";
 
-// create team
-export const createTeam = async (data) => {
-  const res = await api.post("/teams", data);
-  return res.data;
-};
-
+// Get all teams for the logged-in user
 export const getMyTeams = async () => {
   const res = await api.get("/teams/me");
   return res.data;
 };
 
-export const getTeam = async (teamId) => {
+// Get a single team by ID
+export const getTeamById = async (teamId) => {
   const res = await api.get(`/teams/${teamId}`);
   return res.data;
 };
 
-export const addMemberToTeam = async (teamId, payload) => {
-  const res = await api.post(`/teams/${teamId}/members`, payload);
+// Create a team
+export const createTeam = async (data) => {
+  const res = await api.post("/teams", data);
   return res.data;
 };
-
-export const removeMemberFromTeam = async (teamId, memberId) => {
-  const res = await api.delete(`/teams/${teamId}/members/${memberId}`);
-  return res.data;
-};
-
-export const leaveTeam = async (teamId) => {
-  const res = await api.post(`/teams/${teamId}/leave`);
-  return res.data;
-};
-
-
-
 
 // Search users by email
 export const searchUsers = async (query) => {
@@ -40,3 +24,20 @@ export const searchUsers = async (query) => {
   return res.data.users;
 };
 
+// Add a member to team
+export const addMember = async (teamId, userId) => {
+  const res = await api.post(`/teams/${teamId}/members`, { userId });
+  return res.data;
+};
+
+// Remove member from team
+export const removeMember = async (teamId, userId) => {
+  const res = await api.delete(`/teams/${teamId}/members/${userId}`);
+  return res.data;
+};
+
+// Leave team
+export const leaveTeam = async (teamId) => {
+  const res = await api.post(`/teams/${teamId}/leave`);
+  return res.data;
+};
