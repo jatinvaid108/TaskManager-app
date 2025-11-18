@@ -1,0 +1,65 @@
+import Todo from "../models/Todo.js";
+import Team from "../models/Team.js";
+
+export const createTeamTask = async (req, res) => {
+  try {
+    const { name, description, assignedTo } = req.body;
+
+    const team = await Team.findById(req.params.teamId);
+    if (!team) return res.status(404).json({ message: "Team not found" });
+
+    // Only owner/admin can create tasks
+    const member = team.members.find(m => m.user.equals(req.user._id));
+    if (!member || (member.role !== "owner" && member.role !== "admin"))
+      return res.status(403).json({ message: "Only admins can create tasks" });
+
+    const task = await Todo.create({
+      name,
+      description,
+      team: team._id,
+      assignedTo,
+      assignedBy: req.user._id
+    });
+
+    res.status(201).json({ success: true, task });
+  } catch (err) {
+    console.error("TEAM TASK CREATE ERROR:", err);
+    res.status(500).json({ message: err.message });
+}
+
+};
+
+export const getTeamTasks = async (req, res) => {
+  try {
+    const tasks = await Todo.find({ team: req.params.teamId })
+      .populate("assignedTo", "name email")
+      .populate("assignedBy", "name email");
+
+    res.json({ success: true, tasks });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const updateTeamTask = async (req, res) => {
+  try {
+    const task = await Todo.findById(req.params.taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    Object.assign(task, req.body);
+    await task.save();
+
+    res.json({ success: true, task });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const deleteTeamTask = async (req, res) => {
+  try {
+    await Todo.findByIdAndDelete(req.params.taskId);
+    res.json({ success: true, message: "Task deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

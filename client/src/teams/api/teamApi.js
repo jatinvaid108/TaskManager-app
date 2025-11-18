@@ -41,3 +41,31 @@ export const leaveTeam = async (teamId) => {
   const res = await api.post(`/teams/${teamId}/leave`);
   return res.data;
 };
+
+
+// ----------------------------------------------------------------------------------------->
+// ---------------- TEAM TASKS -----------------
+
+// Get tasks for a team
+export const getTeamTasks = async (teamId) => {
+  const res = await api.get(`/teams/${teamId}/tasks`);
+  return res.data.tasks;
+};
+
+// Create a team task
+export const createTeamTask = async (teamId, data) => {
+  const res = await api.post(`/teams/${teamId}/tasks`, data);
+  return res.data.task;
+};
+
+// Update team task (status, assignee, etc)
+export const updateTeamTask = async (teamId, taskId, data) => {
+  const res = await api.put(`/teams/${teamId}/tasks/${taskId}`, data);
+  return res.data.task;
+};
+
+// Delete task
+export const deleteTeamTask = async (teamId, taskId) => {
+  const res = await api.delete(`/teams/${teamId}/tasks/${taskId}`);
+  return res.data;
+};

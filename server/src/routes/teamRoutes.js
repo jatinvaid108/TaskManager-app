@@ -9,6 +9,7 @@ import {
   removeMember,
   leaveTeam,
 } from "../controllers/teamController.js";
+import teamTaskRoutes from "./teamTaskRoutes.js";
 
 const router = express.Router();
 
@@ -31,5 +32,7 @@ router.delete("/:teamId/members/:memberId", isTeamAdminOrOwner, removeMember);
 
 // leave team (self)
 router.post("/:teamId/leave", protect, leaveTeam);
+
+router.use("/:teamId/tasks", teamTaskRoutes);
 
 export default router;
