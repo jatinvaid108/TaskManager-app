@@ -8,6 +8,7 @@ import todoRoutes from "./routes/todoRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 // ---------------- MIDDLEWARES ----------------
 // Parses incoming JSON data
@@ -38,7 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
-
+app.use("/api/users", userRoutes);          //Backend search ready
 // ---------------- TEST ROUTE ----------------
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "Server is healthy 💪" });
