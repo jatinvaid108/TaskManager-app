@@ -1,5 +1,8 @@
 import Team from "../models/Team.js";
 import User from "../models/User.js";
+import { sendEmail } from "../utils/email.js";
+import { teamInviteTemplate } from "../utils/emailTemplates.js";
+
 
 // Create team
 export const createTeam = async (req, res) => {
@@ -56,6 +59,18 @@ export const addMember = async (req, res) => {
 
     team.members.push({ user: userId, role });
     await team.save();
+
+    // Send invitation email
+    const userToAdd = await User.findById(userId);
+    if (userToAdd) {
+      await sendEmail({
+        to: userToAdd.email,
+        subject: `You were added to the team: ${team.name}`,
+        html: teamInviteTemplate(req.user.name, team.name),
+        text: `${req.user.name} added you to the team: ${team.name}.`
+      });
+    }
+
     await team.populate("members.user", "name email");
     res.json({ success: true, team });
   } catch (err) {
