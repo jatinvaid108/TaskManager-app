@@ -11,6 +11,8 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
+import notificationRoutes from "./routes/notificationRoutes.js";
+
 const app = express();
 
 // ---------------- MIDDLEWARES ----------------
@@ -44,6 +46,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/teams", teamRoutes);  // ✅ MOVED HERE
 app.use("/api/users", userRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // ---------------- TEST ROUTE ----------------
 app.get("/api/health", (req, res) => {
