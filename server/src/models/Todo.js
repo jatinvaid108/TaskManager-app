@@ -17,9 +17,9 @@ const todoSchema = new mongoose.Schema(
     },
 
     // -------- Task Name (Universal) --------
-    name: {
+    title: {
       type: String,
-      required: true,   //  replaces old `title`
+      required: true,
       trim: true
     },
 

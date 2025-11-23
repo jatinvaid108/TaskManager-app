@@ -9,8 +9,8 @@ const __dirname = dirname(__filename);
 // Load .env correctly
 dotenv.config({ path: join(__dirname, "../../.env") });
 
-console.log("EMAIL INIT USER:", process.env.EMAIL_USER);
-console.log("EMAIL INIT PASS:", process.env.EMAIL_PASS ? "LOADED" : "MISSING");
+// console.log("EMAIL INIT USER:", process.env.EMAIL_USER);
+// console.log("EMAIL INIT PASS:", process.env.EMAIL_PASS ? "LOADED" : "MISSING");
 
 // Transporter INSIDE function — ensures correct env
 export const sendEmail = async ({ to, subject, html, text }) => {

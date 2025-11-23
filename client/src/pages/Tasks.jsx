@@ -51,21 +51,30 @@ export default function Tasks() {
 
   // ---------------- Add or Update Task ----------------
   const handleSave = async (form) => {
-    try {
-      if (selectedTask) {
-        await api.put(`/todos/${selectedTask._id}`, form);
-        toast.success("Task updated");
-      } else {
-        await api.post("/todos", form);
-        toast.success("Task added");
-      }
-      fetchTasks();
-      setModalOpen(false);
-    } catch (err) {
-      console.error("Error saving task:", err);
-      toast.error("Error saving task");
+  try {
+    const payload = {
+      title: form.title,
+      description: form.description,
+      priority: form.priority,
+      dueDate: form.dueDate
+    };
+
+    if (selectedTask) {
+      await api.put(`/todos/${selectedTask._id}`, payload);
+      toast.success("Task updated");
+    } else {
+      await api.post("/todos", payload);
+      toast.success("Task added");
     }
-  };
+
+    fetchTasks();
+    setModalOpen(false);
+  } catch (err) {
+    console.error("Error saving task:", err);
+    toast.error("Error saving task");
+  }
+};
+
 
   // ---------------- Delete Task ----------------
   const handleDelete = async () => {

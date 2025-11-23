@@ -5,7 +5,9 @@ import { teamInviteTemplate } from "../utils/emailTemplates.js";
 import { createNotification } from "../utils/createNotification.js";
 
 
-// Create team
+// ------------------------------------------------------------
+// Create Team
+// ------------------------------------------------------------
 export const createTeam = async (req, res) => {
   try {
     const { name, description, members = [] } = req.body;
@@ -22,7 +24,7 @@ export const createTeam = async (req, res) => {
 
     await team.save();
 
-    // 🔔 Notify invited members
+    // Notify invited members
     for (const member of members) {
       await createNotification(
         member.userId,
@@ -39,10 +41,48 @@ export const createTeam = async (req, res) => {
 };
 
 
-// Add member (team admin/owner only)
+
+// ------------------------------------------------------------
+// Get all teams for logged-in user
+// ------------------------------------------------------------
+export const getMyTeams = async (req, res) => {
+  try {
+    const teams = await Team.find({ "members.user": req.user._id })
+      .populate("members.user", "name email");
+
+    res.json({ success: true, teams });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+// ------------------------------------------------------------
+// Get Single Team Details
+// ------------------------------------------------------------
+export const getTeamById = async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.teamId)
+      .populate("members.user", "name email");
+
+    if (!team) return res.status(404).json({ message: "Team not found" });
+
+    res.json({ success: true, team });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+// ------------------------------------------------------------
+// Add Member to Team
+// ------------------------------------------------------------
 export const addMember = async (req, res) => {
   try {
     const { userId, role = "member" } = req.body;
+
     const team = await Team.findById(req.params.teamId);
     if (!team) return res.status(404).json({ message: "Team not found" });
 
@@ -56,6 +96,7 @@ export const addMember = async (req, res) => {
     const userToAdd = await User.findById(userId);
 
     if (userToAdd) {
+      // send email notification
       await sendEmail({
         to: userToAdd.email,
         subject: `You were added to the team: ${team.name}`,
@@ -63,7 +104,7 @@ export const addMember = async (req, res) => {
         text: `${req.user.name} added you to the team: ${team.name}.`
       });
 
-      // 🔔 notification
+      // in-app notification
       await createNotification(
         userId,
         "team_invite",
@@ -74,23 +115,28 @@ export const addMember = async (req, res) => {
 
     await team.populate("members.user", "name email");
     res.json({ success: true, team });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 
-// Remove member
+
+// ------------------------------------------------------------
+// Remove Member
+// ------------------------------------------------------------
 export const removeMember = async (req, res) => {
   try {
     const { memberId } = req.params;
+
     const team = await Team.findById(req.params.teamId);
     if (!team) return res.status(404).json({ message: "Team not found" });
 
     team.members = team.members.filter(m => m.user.toString() !== memberId);
     await team.save();
 
-    // 🔔 notification
+    // notify removed user
     await createNotification(
       memberId,
       "team_remove",
@@ -105,16 +151,21 @@ export const removeMember = async (req, res) => {
 };
 
 
-// Leave team
+
+// ------------------------------------------------------------
+// Leave Team
+// ------------------------------------------------------------
 export const leaveTeam = async (req, res) => {
   try {
     const team = await Team.findById(req.params.teamId);
     if (!team) return res.status(404).json({ message: "Team not found" });
 
-    team.members = team.members.filter(m => m.user.toString() !== req.user._id.toString());
+    team.members = team.members.filter(
+      m => m.user.toString() !== req.user._id.toString()
+    );
+
     await team.save();
 
-    // 🔔 notification
     await createNotification(
       req.user._id,
       "team_leave",
