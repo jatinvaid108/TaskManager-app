@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../utils/api.js";
+import { socket } from "../utils/socket";
 
 const AuthContext = createContext();
 
@@ -40,6 +41,12 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("user");
     }
   }, [user]);
+  useEffect(() => {
+  if (user) {
+    socket.auth = { userId: user.id };
+    socket.connect();
+  }
+}, [user]);
 
   return (
     <AuthContext.Provider value={{ user, setUser, loading }}>

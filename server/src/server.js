@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import mongoose from "mongoose";
+import http from "http";
+import { Server } from "socket.io";
 import app from "./app.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,12 +18,48 @@ console.log("DEBUG_EMAIL_PASS:", process.env.EMAIL_PASS ? "LOADED" : "MISSING");
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
+// 1) Create HTTP server from Express app
+const server = http.createServer(app);
+
+// 2) Attach Socket.io on top of HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173", // your React dev server
+    credentials: true,
+  },
+});
+
+// 3) Make io globally available (for createNotification.js)
+globalThis.io = io;
+
+// 4) Handle socket connections
+io.on("connection", (socket) => {
+  console.log("🔌 Socket connected:", socket.id);
+
+  // front-end will send: socket.emit("join", userId)
+  socket.on("join", (userId) => {
+    if (!userId) return;
+    socket.join(userId.toString());
+    console.log(`👤 User ${userId} joined room ${userId}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ Socket disconnected:", socket.id);
+  });
+});
+
+// 5) Connect DB, then start server
+
+
 mongoose
   .connect(MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected Successfully");
-    app.listen(PORT, () =>
-      console.log(`🚀 Server running on http://localhost:${PORT}`)
+
+    // Use HTTP server instead of app.listen !!!
+    server.listen(PORT, () =>
+      console.log(`🚀 Server + Socket.IO running on http://localhost:${PORT}`)
     );
   })
   .catch((err) => console.error("❌ MongoDB Connection Error:", err.message));
+
