@@ -17,10 +17,16 @@ const app = express();
 
 // ---------------- MIDDLEWARES ----------------
 
+// Needed for correct cookie handling behind Render proxy
+app.set("trust proxy", 1);
+
 // CORS MUST BE FIRST
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://taskmanagerjv.netlify.app"
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
