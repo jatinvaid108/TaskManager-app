@@ -24,7 +24,11 @@ const server = http.createServer(app);
 // 2) Attach Socket.io on top of HTTP server
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // your React dev server
+    origin: [
+      "http://localhost:5173",
+      "https://taskmanagerjv.netlify.app"
+    ],
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });
