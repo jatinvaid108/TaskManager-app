@@ -30,7 +30,7 @@ export default function Tasks() {
     }
   };
 
-  // ---------------- Fetch Tasks by Filter ----------------
+  // ---------------- Filter Tasks ----------------
   const fetchTasksBy = async (filter) => {
     setLoading(true);
     try {
@@ -51,30 +51,29 @@ export default function Tasks() {
 
   // ---------------- Add or Update Task ----------------
   const handleSave = async (form) => {
-  try {
-    const payload = {
-      title: form.title,
-      description: form.description,
-      priority: form.priority,
-      dueDate: form.dueDate
-    };
+    try {
+      const payload = {
+        title: form.title,
+        description: form.description,
+        priority: form.priority,
+        dueDate: form.dueDate,
+      };
 
-    if (selectedTask) {
-      await api.put(`/todos/${selectedTask._id}`, payload);
-      toast.success("Task updated");
-    } else {
-      await api.post("/todos", payload);
-      toast.success("Task added");
+      if (selectedTask) {
+        await api.put(`/todos/${selectedTask._id}`, payload);
+        toast.success("Task updated");
+      } else {
+        await api.post("/todos", payload);
+        toast.success("Task added");
+      }
+
+      fetchTasks();
+      setModalOpen(false);
+    } catch (err) {
+      console.error("Error saving task:", err);
+      toast.error("Error saving task");
     }
-
-    fetchTasks();
-    setModalOpen(false);
-  } catch (err) {
-    console.error("Error saving task:", err);
-    toast.error("Error saving task");
-  }
-};
-
+  };
 
   // ---------------- Delete Task ----------------
   const handleDelete = async () => {
@@ -90,29 +89,49 @@ export default function Tasks() {
     }
   };
 
-  // ---------------- Toggle Complete ----------------
+  // ---------------- Toggle Complete (Optimistic UI) ----------------
   const handleToggleComplete = async (task) => {
+    const updated = !task.completed;
+
+    // 1️⃣ Instant UI update
+    setTasks((prev) =>
+      prev.map((t) =>
+        t._id === task._id ? { ...t, completed: updated } : t
+      )
+    );
+
     try {
-      await api.put(`/todos/${task._id}`, { completed: !task.completed });
-      toast.success(task.completed ? "Marked as pending" : "Task completed!");
-      fetchTasks();
-    } catch {
+      // 2️⃣ API update
+      await api.put(`/todos/${task._id}`, { completed: updated });
+      toast.success(updated ? "Task completed!" : "Marked as pending");
+    } catch (err) {
       toast.error("Failed to update status");
+
+      // 3️⃣ Revert UI if failed
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === task._id ? { ...t, completed: task.completed } : t
+        )
+      );
     }
   };
 
   // ---------------- Mark All Completed ----------------
   const markAllCompleted = async () => {
     try {
+      // 1️⃣ Optimistic update
+      setTasks((prev) => prev.map((t) => ({ ...t, completed: true })));
+
+      // 2️⃣ API update
       await api.put("/todos/mark-all-completed");
+
       toast.success("All tasks marked as completed");
-      fetchTasks();
     } catch {
       toast.error("Failed to mark all as completed");
+      fetchTasks(); // fallback restore
     }
   };
 
-  // ---------------- Initial Load ----------------
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -155,7 +174,7 @@ export default function Tasks() {
         </select>
       </div>
 
-      {/* ---------- Task List Section ---------- */}
+      {/* ---------- Task List ---------- */}
       {loading ? (
         <div className="flex justify-center mt-10">
           <ClipLoader color="#6366F1" size={40} />

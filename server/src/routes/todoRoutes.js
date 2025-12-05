@@ -2,26 +2,26 @@ import express from "express";
 import { createTodo, getTodos, getTodoById, updateTodo, deleteTodo, restoreTodo, markAllCompleted,restoreAll,assignTask,unassignTask } from "../controllers/todoController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
-const router=express.Router();
+const router = express.Router();
 
 // all routes below are protected (user must be logged in)
 router.use(protect);
 
+/* ---------- SPECIAL ROUTES (must come first) ---------- */
+router.put("/mark-all-completed", markAllCompleted);
+router.put("/restore-all", restoreAll);
 
-router.post("/",createTodo);
-router.get("/",getTodos);
-router.get("/:id",getTodoById);   // get single task
-router.put("/:id",updateTodo);
-router.delete("/:id",deleteTodo);     // soft delete task
+/* ---------- TASK CRUD ROUTES ---------- */
+router.post("/", createTodo);
+router.get("/", getTodos);
+
 router.put("/restore/:id", restoreTodo);
-router.put("/mark-all-completed", protect, markAllCompleted); //extra frontend button
-router.put("/restore-all", protect, restoreAll);
-router.put("/:id/assign", protect, assignTask);
-router.put("/:id/unassign", protect, unassignTask);
 
+router.put("/:id/assign", assignTask);
+router.put("/:id/unassign", unassignTask);
 
+router.get("/:id", getTodoById);
+router.put("/:id", updateTodo);
+router.delete("/:id", deleteTodo);
 
 export default router;
-
-
-//Instead of repeating protect in every line, we attach it once to the whole router.

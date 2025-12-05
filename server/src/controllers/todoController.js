@@ -113,21 +113,27 @@ export const getTodoById = async (req, res) => {
 //Update a task
 export const updateTodo = async (req, res) => {
   try {
-    const { title, description, priority, dueDate, completed } = req.body;
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "No update data provided" });
+    }
+
+    const updates = { ...req.body }; // <-- allows partial fields safely
+
     const todo = await Todo.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      { title, description, priority, dueDate, completed },
+      updates,
       { new: true }
     );
 
-    if (!todo) return res.status(404).json({ message: "Task not Found" });
+    if (!todo) return res.status(404).json({ message: "Task not found" });
+
     res.json({ success: true, todo });
-  }
-  catch (err) {
-    console.error("❌ TASK CREATE ERROR:", err);
+  } catch (err) {
+    console.error("❌ TASK UPDATE ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // DELETE (soft delete)
 export const deleteTodo = async (req, res) => {
@@ -176,12 +182,19 @@ export const restoreTodo = async (req, res) => {
 
 export const markAllCompleted = async (req, res) => {
   try {
-    await Todo.updateMany({ user: req.user._id, deleted: false }, { completed: true });
-    res.json({ message: "All tasks marked as completed" });
+    await Todo.updateMany(
+      { user: req.user._id, deleted: false },
+      { completed: true }
+    );
+
+    res.json({ success: true, message: "All tasks marked as completed" });
   } catch (err) {
+    console.error("Error in markAllCompleted:", err);
     res.status(500).json({ message: err.message });
   }
 };
+
+
 
 export const restoreAll = async (req, res) => {
   try {
