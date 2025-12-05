@@ -5,16 +5,28 @@ export const createTeamTask = async (req, res) => {
   try {
     const { name, description, assignedTo } = req.body;
 
+    console.log("📥 Incoming Task Data:", req.body);
+
+    if (!name) return res.status(400).json({ message: "Task name is required" });
+
     const team = await Team.findById(req.params.teamId);
     if (!team) return res.status(404).json({ message: "Team not found" });
 
-    // Only owner/admin can create tasks
-    const member = team.members.find(m => m.user.equals(req.user._id));
-    if (!member || (member.role !== "owner" && member.role !== "admin"))
+    // Check if user is member
+    const member = team.members.find(
+      m => m.user.toString() === req.user._id.toString()
+    );
+
+    if (!member)
+      return res.status(403).json({ message: "You are not a team member" });
+
+    // Check if admin/owner
+    if (!["owner", "admin"].includes(member.role))
       return res.status(403).json({ message: "Only admins can create tasks" });
 
+    // Create the task
     const task = await Todo.create({
-      name,
+      title: name,          // 🔥 your Todo schema expects "title", NOT "name"
       description,
       team: team._id,
       assignedTo,
@@ -22,12 +34,15 @@ export const createTeamTask = async (req, res) => {
     });
 
     res.status(201).json({ success: true, task });
-  } catch (err) {
-    console.error("TEAM TASK CREATE ERROR:", err);
-    res.status(500).json({ message: err.message });
-}
 
+  } catch (err) {
+    console.error("❌ TEAM TASK CREATE ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
 };
+
+
+
 
 export const getTeamTasks = async (req, res) => {
   try {
