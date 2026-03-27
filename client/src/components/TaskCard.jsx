@@ -1,6 +1,8 @@
 import { Edit2, Trash2, CheckCircle2, Circle } from "lucide-react";
 
 export default function TaskCard({ task, onEdit, onDelete, onToggleComplete }) {
+  const isDone = task.status?.toLowerCase() === "done" || task.completed;
+
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex justify-between items-center">
       
@@ -9,7 +11,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete }) {
         
         {/* Toggle Complete Button */}
         <button onClick={() => onToggleComplete(task)} className="mt-1">
-          {task.completed ? (
+          {isDone ? (
             <CheckCircle2 className="text-green-500" size={22} />
           ) : (
             <Circle className="text-gray-400 hover:text-green-500" size={22} />
@@ -20,7 +22,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete }) {
         <div>
           <h3
             className={`text-lg font-semibold ${
-              task.completed ? "line-through text-gray-500" : "text-gray-900"
+              isDone ? "line-through text-gray-500" : "text-gray-900"
             }`}
           >
             {task.title}

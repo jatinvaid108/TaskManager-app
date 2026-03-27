@@ -50,7 +50,7 @@ export const getSystemStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalTasks = await Todo.countDocuments();
-    const completedTasks = await Todo.countDocuments({ completed: true });
+    const completedTasks = await Todo.countDocuments({ status: "done" });
     const deletedTasks = await Todo.countDocuments({ deleted: true });
 
     res.json({

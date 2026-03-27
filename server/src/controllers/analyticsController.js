@@ -33,7 +33,13 @@ export const taskCompletionStats = async (req, res) => {
     const data = await Todo.aggregate([
       {
         $group: {
-          _id: "$completed",
+          _id: {
+            $cond: [
+              { $eq: ["$status", "done"] },
+              "done",
+              "pending"
+            ]
+          },
           count: { $sum: 1 }
         }
       }
