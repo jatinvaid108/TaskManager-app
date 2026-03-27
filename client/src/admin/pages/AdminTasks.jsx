@@ -70,7 +70,7 @@ export default function AdminTasks() {
                   <td className="p-3 text-blue-600">{task.user?.name}</td>
                   <td className="p-3 capitalize">{task.priority}</td>
                   <td className="p-3">
-                    {task.completed ? (
+                    {(task.status && task.status.toLowerCase() === "done") || task.completed ? (
                       <span className="text-green-600 font-medium">Yes</span>
                     ) : (
                       <span className="text-gray-500">No</span>

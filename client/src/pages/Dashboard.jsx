@@ -22,8 +22,20 @@ export default function Dashboard() {
         const tasks = res.data.tasks || [];
 
         const total = tasks.length;
-        const completed = tasks.filter((t) => t.completed).length;
-        const pending = tasks.filter((t) => !t.completed).length;
+
+        const completed = tasks.filter((t) => {
+          const statusDone = t.status?.toString().toLowerCase() === "done";
+          const completedFlag = Boolean(t.completed);
+          // Primary source: status is done. Backward compatibility: early items may use completed boolean.
+          return statusDone || (!t.status && completedFlag);
+        }).length;
+
+        const pending = tasks.filter((t) => {
+          const statusDone = t.status?.toString().toLowerCase() === "done";
+          const completedFlag = Boolean(t.completed);
+          const isCompleted = statusDone || (!t.status && completedFlag);
+          return !isCompleted;
+        }).length;
 
         // -------- Fetch deleted tasks count --------
         const deletedRes = await api.get("/todos?deleted=true");

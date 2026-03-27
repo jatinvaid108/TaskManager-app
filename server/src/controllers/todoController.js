@@ -38,7 +38,7 @@ export const createTodo = async (req, res) => {
 
 export const getTodos = async (req, res) => {
   try {
-    const { completed, priority, deleted, search, sort } = req.query;
+    const { completed, status, priority, deleted, search, sort } = req.query;
 
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
@@ -51,9 +51,19 @@ export const getTodos = async (req, res) => {
     if (deleted === "true") filter.deleted = true;
     else filter.deleted = false;
 
-    // Filter by completion
-    if (completed !== undefined)
-      filter.completed = completed === "true";
+    // Filter by status (primary)
+    if (status) {
+      if (status === "pending") {
+        filter.status = { $ne: "done" };
+      } else {
+        filter.status = status;
+      }
+    }
+
+    // Backward compatible completed filter
+    if (completed !== undefined) {
+      filter.status = completed === "true" ? "done" : { $ne: "done" };
+    }
 
     // Filter by priority
     if (priority) filter.priority = priority;
@@ -118,6 +128,12 @@ export const updateTodo = async (req, res) => {
     }
 
     const updates = { ...req.body }; // <-- allows partial fields safely
+
+    // Normalize compatibility in updates: force status field and drop completed boolean.
+    if (updates.completed !== undefined) {
+      updates.status = updates.completed ? "done" : "todo";
+      delete updates.completed;
+    }
 
     const todo = await Todo.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
@@ -184,7 +200,7 @@ export const markAllCompleted = async (req, res) => {
   try {
     await Todo.updateMany(
       { user: req.user._id, deleted: false },
-      { completed: true }
+      { status: "done" }
     );
 
     res.json({ success: true, message: "All tasks marked as completed" });
