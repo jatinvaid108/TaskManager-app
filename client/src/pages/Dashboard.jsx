@@ -3,6 +3,7 @@ import StatCard from "../components/StatCard.jsx";
 import { ClipboardList, CheckCircle2, Clock, Trash2 } from "lucide-react";
 import api from "../utils/api.js";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom"; 
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -12,6 +13,7 @@ export default function Dashboard() {
     deleted: 0,
   });
 
+  const location= useLocation();
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -39,8 +41,8 @@ export default function Dashboard() {
       }
     };
 
-    fetchStats();
-  }, []);
+     fetchStats();
+}, [location.pathname]);   // THIS IS THE FIX for Completed task issue 
 
   return (
     <DashboardLayout>
