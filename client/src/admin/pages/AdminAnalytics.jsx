@@ -42,7 +42,7 @@ export default function AdminAnalytics() {
       // Format pie data
       setCompletionData(
         completion.map((item) => ({
-          name: item._id ? "Completed" : "Pending",
+          name: item._id === "done" ? "Completed" : "Pending",
           value: item.count
         }))
       );

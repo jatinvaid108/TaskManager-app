@@ -145,7 +145,8 @@ export default function TeamPage() {
         <AddMemberModal
           teamId={teamId}
           onClose={() => setShowAddModal(false)}
-          onAdded={loadTeam}
+          onAdded={(response) => setTeam(response.team)}
+          currentMembers={team.members}
         />
       )}
 

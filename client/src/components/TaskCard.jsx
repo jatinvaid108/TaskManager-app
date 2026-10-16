@@ -3,6 +3,8 @@ import { StatusBadge, PriorityBadge } from "./TaskBadges.jsx";
 import { formatDate } from "../utils/formatDate.js";
 
 export default function TaskCard({ task, onEdit, onDelete, onToggleComplete }) {
+  const isDone = task.status?.toLowerCase() === "done" || task.completed;
+
   return (
     <div
       className={`card flex flex-col p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-line-strong ${

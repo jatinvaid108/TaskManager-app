@@ -4,25 +4,33 @@ import { searchUsers, addMember } from "../api/teamApi";
 import Avatar from "../../components/Avatar.jsx";
 import toast from "react-hot-toast";
 
-export default function AddMemberModal({ teamId, onClose, onAdded }) {
+export default function AddMemberModal({ teamId, onClose, onAdded, currentMembers = [] }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [adding, setAdding] = useState(null); // userId being added
 
   const handleSearch = async (val) => {
     setQuery(val);
     if (val.length < 2) return;
     const users = await searchUsers(val);
-    setResults(users);
+    // Filter out users who are already members
+    const filteredUsers = users.filter(u => !currentMembers.some(m => m.user._id === u._id));
+    setResults(filteredUsers);
   };
 
   const handleAdd = async (userId) => {
+    if (adding) return; // Prevent multiple adds
+    setAdding(userId);
     try {
-      await addMember(teamId, userId);
-      toast.success("Member added");
-      onAdded();
+      const response = await addMember(teamId, userId);
+      toast.success("Member added successfully");
+      onAdded(response); // Pass the updated team data
       onClose();
-    } catch {
-      toast.error("Failed to add member");
+    } catch (error) {
+      console.error("Add member error:", error);
+      toast.error(error.response?.data?.message || "Failed to add member");
+    } finally {
+      setAdding(null);
     }
   };
 

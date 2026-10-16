@@ -46,8 +46,8 @@ export default function Tasks() {
     try {
       let url = "/todos";
 
-      if (filter === "completed") url = "/todos?completed=true";
-      else if (filter === "pending") url = "/todos?completed=false";
+      if (filter === "completed") url = "/todos?status=done";
+      else if (filter === "pending") url = "/todos?status=pending";
       else if (filter === "high") url = "/todos?priority=high";
 
       const res = await api.get(url, { params: { limit: TASK_LIMIT } });
@@ -101,12 +101,13 @@ export default function Tasks() {
 
   // ---------------- Toggle Complete (Optimistic UI) ----------------
   const handleToggleComplete = async (task) => {
-    const updated = !task.completed;
+    const isDone = task.status?.toLowerCase() === "done" || task.completed;
+    const updatedStatus = isDone ? "todo" : "done";
 
     // 1️⃣ Instant UI update
     setTasks((prev) =>
       prev.map((t) =>
-        t._id === task._id ? { ...t, completed: updated } : t
+        t._id === task._id ? { ...t, status: updatedStatus } : t
       )
     );
 
@@ -120,7 +121,7 @@ export default function Tasks() {
       // 3️⃣ Revert UI if failed
       setTasks((prev) =>
         prev.map((t) =>
-          t._id === task._id ? { ...t, completed: task.completed } : t
+          t._id === task._id ? { ...t, status: task.status } : t
         )
       );
     }
@@ -130,7 +131,7 @@ export default function Tasks() {
   const markAllCompleted = async () => {
     try {
       // 1️⃣ Optimistic update
-      setTasks((prev) => prev.map((t) => ({ ...t, completed: true })));
+      setTasks((prev) => prev.map((t) => ({ ...t, status: "done" })));
 
       // 2️⃣ API update
       await api.put("/todos/mark-all-completed");

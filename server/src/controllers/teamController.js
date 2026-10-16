@@ -86,17 +86,22 @@ export const addMember = async (req, res) => {
     const team = await Team.findById(req.params.teamId);
     if (!team) return res.status(404).json({ message: "Team not found" });
 
+    // Check if user is already a member
     if (team.members.some(m => m.user.toString() === userId)) {
-      return res.status(400).json({ message: "User already a member" });
+      return res.status(400).json({ message: "User is already a member of this team" });
     }
 
-    team.members.push({ user: userId, role });
+    // Add the member
+    const newMember = { user: userId, role, joinedAt: new Date() };
+    team.members.push(newMember);
     await team.save();
 
+    // Get user details for notifications
     const userToAdd = await User.findById(userId);
 
+    // Send notifications if user exists
     if (userToAdd) {
-      // send email notification
+      // Send email notification
       await sendEmail({
         to: userToAdd.email,
         subject: `You were added to the team: ${team.name}`,
@@ -104,7 +109,7 @@ export const addMember = async (req, res) => {
         text: `${req.user.name} added you to the team: ${team.name}.`
       });
 
-      // in-app notification
+      // In-app notification
       await createNotification(
         userId,
         "team_invite",
@@ -113,10 +118,26 @@ export const addMember = async (req, res) => {
       );
     }
 
+    // Populate member user data
     await team.populate("members.user", "name email");
-    res.json({ success: true, team });
+
+    // Find the newly added member in the populated team
+    const addedMember = team.members.find(m => m.user._id.toString() === userId);
+
+    // Return success response with 201 status
+    res.status(201).json({
+      success: true,
+      message: "Member added successfully",
+      team,
+      addedMember: {
+        user: addedMember.user,
+        role: addedMember.role,
+        joinedAt: addedMember.joinedAt
+      }
+    });
 
   } catch (err) {
+    console.error("Add member error:", err);
     res.status(500).json({ message: err.message });
   }
 };
