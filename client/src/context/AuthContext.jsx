@@ -18,13 +18,16 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const res = await api.get("/auth/me");
-        setUser(res.data.user);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-      } catch {
-        // IMPORTANT CHANGE:
-        // Do NOT clear user immediately during loading.
-        // Let protected route wait for loading to finish.
+        const res = await api.get("/auth/getMe");
+        const me = res.data.user;
+        // Keep the same shape as login/register ({ id, ... }) — the app compares user.id
+        const normalized = { id: me._id, name: me.name, email: me.email, role: me.role };
+        setUser(normalized);
+        localStorage.setItem("user", JSON.stringify(normalized));
+      } catch (err) {
+        // Session expired or cookie missing → log out locally.
+        // Network/server errors keep the saved user (offline-friendly).
+        if (err.response?.status === 401) setUser(null);
       } finally {
         setLoading(false);
       }

@@ -58,7 +58,8 @@ export const getTeamTasks = async (req, res) => {
 
 export const updateTeamTask = async (req, res) => {
   try {
-    const task = await Todo.findById(req.params.taskId);
+    // Task must belong to this team
+    const task = await Todo.findOne({ _id: req.params.taskId, team: req.params.teamId });
     if (!task) return res.status(404).json({ message: "Task not found" });
 
     Object.assign(task, req.body);
@@ -72,7 +73,9 @@ export const updateTeamTask = async (req, res) => {
 
 export const deleteTeamTask = async (req, res) => {
   try {
-    await Todo.findByIdAndDelete(req.params.taskId);
+    // Task must belong to this team
+    const task = await Todo.findOneAndDelete({ _id: req.params.taskId, team: req.params.teamId });
+    if (!task) return res.status(404).json({ message: "Task not found" });
     res.json({ success: true, message: "Task deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });

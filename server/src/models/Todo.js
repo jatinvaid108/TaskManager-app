@@ -41,6 +41,12 @@ const todoSchema = new mongoose.Schema(
       default: null
     },
 
+    // -------- Completion (personal tasks) --------
+    completed: {
+      type: Boolean,
+      default: false
+    },
+
     // -------- Task Status (Team + personal both use this) --------
     status: {
       type: String,

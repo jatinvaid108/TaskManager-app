@@ -1,92 +1,69 @@
 /* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
-import { ArrowRight, Menu } from "lucide-react";
-import logo from "../assets/logo.png";
-import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, ClipboardList, Target, Users } from "lucide-react";
+import PublicLayout from "../layout/PublicLayout.jsx";
+
+const features = [
+  { title: "Plan Tasks", text: "Create and organize your tasks easily.", icon: ClipboardList },
+  { title: "Track Progress", text: "Stay on track and never miss a deadline.", icon: Target },
+  { title: "Achieve More", text: "Collaborate and get things done faster.", icon: Users },
+];
 
 export default function Landing() {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-teal-50 flex flex-col">
-
-      {/* ================= NAVBAR ================= */}
-      <nav className="flex items-center justify-between px-6 sm:px-10 py-5 relative">
-        
-        {/* Left: Logo + Name */}
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="logo" className="w-10 h-10" />
-          <h1 className="text-xl sm:text-2xl font-bold text-primary whitespace-nowrap">
-            TaskManager <span className="text-indigo-500">Pro</span>
-          </h1>
-        </div>
-
-        {/* Desktop Buttons */}
-        <div className="space-x-5 hidden sm:flex">
-          <a href="/login" className="text-gray-600 hover:text-primary font-medium">
-            Login
-          </a>
-          <a
-            href="/register"
-            className="bg-primary text-white px-5 py-2 rounded-lg hover:bg-indigo-600 transition-all"
-          >
-            Get Started
-          </a>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          className="sm:hidden p-2 text-gray-700"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <Menu size={26} />
-        </button>
-
-        {/* Mobile Dropdown Menu */}
-        {menuOpen && (
-          <div className="absolute top-16 right-6 bg-white shadow-lg rounded-lg p-4 flex flex-col gap-3 sm:hidden z-50">
-            <a href="/login" className="text-gray-700 hover:text-primary font-medium">
-              Login
-            </a>
-            <a
-              href="/register"
-              className="bg-primary text-white px-4 py-2 rounded-lg text-center hover:bg-indigo-600 transition-all"
-            >
-              Get Started
-            </a>
-          </div>
-        )}
-      </nav>
-
+    <PublicLayout>
       {/* ================= HERO SECTION ================= */}
-      <motion.div
-        className="flex flex-col items-center justify-center flex-1 text-center px-6"
+      <motion.section
+        className="flex flex-1 flex-col items-center px-4 pb-20 pt-10 text-center sm:pt-16"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-dark mb-4 leading-tight">
-          Organize your <span className="text-primary">Tasks</span> Smartly.
-        </h2>
+        <span className="mb-8 inline-flex items-center gap-2 rounded-full border border-line bg-surface/70 px-4 py-1.5 text-sm font-medium text-brand-light">
+          🚀 Boost Productivity
+        </span>
 
-        <p className="text-gray-600 text-base sm:text-lg max-w-2xl mb-8">
+        <h1 className="max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-6xl md:text-7xl">
+          Organize your{" "}
+          <br className="hidden sm:block" />
+          <span className="bg-gradient-to-r from-brand-light to-brand bg-clip-text text-transparent">
+            Tasks
+          </span>{" "}
+          Smartly.
+        </h1>
+
+        <p className="mt-6 max-w-2xl text-base leading-relaxed text-ink-muted sm:text-lg">
           Boost productivity with your personal task manager. Plan, track,
           and achieve your goals seamlessly — anytime, anywhere.
         </p>
 
-        <a
-          href="/register"
-          className="bg-primary text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-indigo-600 transition-all"
+        <Link
+          to="/register"
+          className="btn-primary mt-10 bg-brand-gradient px-8 py-4 text-lg shadow-glow hover:brightness-110"
         >
           Get Started
-          <ArrowRight className="w-5 h-5" />
-        </a>
-      </motion.div>
+          <ArrowRight className="h-5 w-5" />
+        </Link>
 
-      {/* ================= FOOTER ================= */}
-      <footer className="text-center py-6 text-sm text-gray-500 border-t">
-        © {new Date().getFullYear()} TaskManager Pro — Built with ❤️ by Jatin
-      </footer>
-    </div>
+        {/* ================= FEATURES ================= */}
+        <div className="mt-20 grid w-full max-w-4xl gap-8 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-line">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <div key={feature.title} className="flex items-start gap-4 text-left sm:px-6">
+                <div className="icon-tile h-14 w-14 shrink-0 text-brand-light">
+                  <Icon size={26} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-ink">{feature.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-ink-muted">{feature.text}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </motion.section>
+    </PublicLayout>
   );
 }

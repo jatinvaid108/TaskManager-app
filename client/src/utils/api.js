@@ -7,4 +7,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// The tasks API returns 10 items per page by default; ask for all of them
+export const TASK_LIMIT = 1000;
+
 export default api;

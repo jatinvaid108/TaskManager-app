@@ -2,6 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dark page background (no light flash while pages load).
+   Text color stays gray-800 because the admin panel still uses light cards. */
 body {
-  @apply bg-gray-50 text-gray-800 font-sans;
+  @apply bg-night text-gray-800 font-sans;
+}
+
+@layer base {
+  /* Dark pages: makes native controls (select, date picker, scrollbars) dark too */
+  .theme-dark {
+    color-scheme: dark;
+  }
+}
+
+/* ---------- Dark redesign: reusable component classes ---------- */
+@layer components {
+  .card {
+    @apply bg-surface border border-line rounded-2xl;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5
+           text-sm font-medium text-white transition-colors hover:bg-brand-dark
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-light/60
+           disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line
+           bg-surface/60 px-4 py-2.5 text-sm font-medium text-ink transition-colors
+           hover:border-line-strong hover:bg-surface-hover
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-light/40
+           disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .icon-btn {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl text-ink-muted
+           transition-colors hover:bg-surface-hover hover:text-ink
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-light/40;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface-raised px-4 py-3 text-sm text-ink
+           placeholder:text-ink-subtle transition-colors
+           focus:border-brand/60 focus:outline-none focus:ring-2 focus:ring-brand/20
+           [&:user-invalid]:border-red-500/60 [&:user-invalid]:ring-red-500/20;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .icon-tile {
+    @apply flex items-center justify-center rounded-xl border border-line bg-surface-raised;
+  }
 }

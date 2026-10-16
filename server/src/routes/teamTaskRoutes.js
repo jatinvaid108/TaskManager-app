@@ -1,5 +1,6 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
+import { isTeamMember } from "../middleware/teamMiddleware.js";
 import {
   createTeamTask,
   getTeamTasks,
@@ -10,6 +11,7 @@ import {
 const router = express.Router({ mergeParams: true });
 
 router.use(protect);
+router.use(isTeamMember); // only members of this team can see or change its tasks
 
 router.post("/", createTeamTask);
 router.get("/", getTeamTasks);

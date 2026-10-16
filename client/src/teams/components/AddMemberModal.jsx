@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Search } from "lucide-react";
 import { searchUsers, addMember } from "../api/teamApi";
+import Avatar from "../../components/Avatar.jsx";
 import toast from "react-hot-toast";
 
 export default function AddMemberModal({ teamId, onClose, onAdded, currentMembers = [] }) {
@@ -33,65 +35,53 @@ export default function AddMemberModal({ teamId, onClose, onAdded, currentMember
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex justify-center items-center p-4">
-      <div className="bg-white p-6 rounded shadow w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="card max-h-[90vh] w-full max-w-md overflow-y-auto p-6 shadow-2xl shadow-black/50 sm:p-7">
 
-        <h2 className="text-xl font-semibold mb-4">Add Member</h2>
+        <h2 className="text-xl font-semibold text-ink">Add Member</h2>
+        <p className="mb-5 mt-1 text-sm text-ink-muted">Search by email, then select a user to add.</p>
 
-        <input
-          type="text"
-          placeholder="Search email..."
-          className="border p-2 w-full rounded mb-3"
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-          disabled={adding !== null}
-        />
+        <label className="block">
+          <span className="sr-only">Search email</span>
+          <span className="relative block">
+            <Search
+              size={16}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-subtle"
+            />
+            <input
+              type="text"
+              placeholder="Search email..."
+              className="input pl-10"
+              value={query}
+              onChange={(e) => handleSearch(e.target.value)}
+              autoFocus
+            />
+          </span>
+        </label>
+        <p className="mt-1.5 px-1 text-xs text-ink-subtle">Type at least 2 characters.</p>
 
-        <div className="max-h-40 overflow-y-auto border rounded mb-4">
-          {results.map((u) => (
-            <div
-              key={u._id}
-              className="p-2 flex justify-between items-center border-b last:border-b-0"
-            >
-              <div>
-                <p className="font-medium">{u.name}</p>
-                <p className="text-sm text-gray-600">{u.email}</p>
-              </div>
+        {results.length > 0 && (
+          <div className="mt-3 max-h-52 overflow-y-auto rounded-xl border border-line bg-surface-raised p-1">
+            {results.map((u) => (
               <button
+                type="button"
+                key={u._id}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-surface-hover"
                 onClick={() => handleAdd(u._id)}
-                disabled={adding !== null}
-                className={`px-3 py-1 rounded text-sm font-medium ${
-                  adding === u._id
-                    ? 'bg-blue-100 text-blue-600 cursor-not-allowed'
-                    : adding !== null
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-500'
-                }`}
               >
-                {adding === u._id ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Adding...
-                  </span>
-                ) : (
-                  'Add'
-                )}
+                <Avatar name={u.name} id={u._id} size="sm" />
+                <span className="min-w-0">
+                  <span className="block truncate font-medium text-ink">{u.name}</span>
+                  <span className="block truncate text-sm text-ink-muted">{u.email}</span>
+                </span>
               </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <button
           onClick={onClose}
-          disabled={adding !== null}
-          className={`px-4 py-2 rounded w-full ${
-            adding !== null
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-300 hover:bg-gray-400'
-          }`}
+          className="btn-ghost mt-6 w-full"
         >
           Close
         </button>

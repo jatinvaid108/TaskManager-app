@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ClipLoader } from "react-spinners";
 import { createTeamTask } from "../api/teamApi";
 import toast from "react-hot-toast";
 
@@ -8,9 +9,11 @@ export default function CreateTeamTaskModal({ teamId, members, onClose, onCreate
     description: "",
     assignedTo: ""
   });
+  const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
       await createTeamTask(teamId, form);
       toast.success("Task created");
@@ -18,53 +21,70 @@ export default function CreateTeamTaskModal({ teamId, members, onClose, onCreate
       onClose();
     } catch {
       toast.error("Failed to create task");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex justify-center items-center p-4">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Create Task</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="card max-h-[90vh] w-full max-w-md space-y-4 overflow-y-auto p-6 shadow-2xl shadow-black/50 sm:p-7"
+      >
+        <h2 className="text-xl font-semibold text-ink">Create Task</h2>
 
-        <input
-          type="text"
-          placeholder="Task name"
-          className="border p-2 w-full rounded mb-3"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium text-ink-muted">Task name</span>
+          <input
+            type="text"
+            placeholder="Task name"
+            className="input"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
+        </label>
 
-        <textarea
-          placeholder="Description"
-          className="border p-2 w-full rounded mb-3"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-        />
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium text-ink-muted">Description</span>
+          <textarea
+            placeholder="Description"
+            rows={3}
+            className="input resize-none"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </label>
 
-        <select
-          className="border p-2 w-full rounded mb-3"
-          value={form.assignedTo}
-          onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
-        >
-          <option value="">Assign to...</option>
-          {members.map((m) => (
-            <option key={m.user._id} value={m.user._id}>
-              {m.user.name}
-            </option>
-          ))}
-        </select>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium text-ink-muted">Assign to</span>
+          <select
+            className="input"
+            value={form.assignedTo}
+            onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
+          >
+            <option value="">Assign to...</option>
+            {members.map((m) => (
+              <option key={m.user._id} value={m.user._id}>
+                {m.user.name}
+              </option>
+            ))}
+          </select>
+        </label>
 
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded w-full">
-          Create Task
-        </button>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="bg-gray-300 px-4 py-2 rounded w-full mt-2"
-        >
-          Cancel
-        </button>
+        <div className="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-ghost"
+          >
+            Cancel
+          </button>
+          <button disabled={saving} className="btn-primary min-w-[120px]">
+            {saving ? <ClipLoader color="#fff" size={16} /> : "Create Task"}
+          </button>
+        </div>
       </form>
     </div>
   );
