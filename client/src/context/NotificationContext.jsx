@@ -7,7 +7,6 @@ import {
 } from "../api/notificationApi";
 import { useAuth } from "./AuthContext";
 import { io } from "socket.io-client";
-import { socket } from "../utils/socket"; // <= make sure this exists
 const NotificationContext = createContext();
 
 const SOCKET_URL =

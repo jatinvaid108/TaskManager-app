@@ -52,8 +52,9 @@ export const getTodos = async (req, res) => {
     else filter.deleted = false;
 
     // Filter by completion
+    // ("not true" so older tasks saved without the field still count as pending)
     if (completed !== undefined)
-      filter.completed = completed === "true";
+      filter.completed = completed === "true" ? true : { $ne: true };
 
     // Filter by priority
     if (priority) filter.priority = priority;
@@ -175,6 +176,21 @@ export const restoreTodo = async (req, res) => {
     );
     if (!todo) return res.status(404).json({ message: "Task not found or not deleted" });
     res.json({ success: true, message: "Task restored", todo });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Permanently delete one of the user's own tasks (only from Trash)
+export const permanentDeleteTodo = async (req, res) => {
+  try {
+    const todo = await Todo.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id,
+      deleted: true,
+    });
+    if (!todo) return res.status(404).json({ message: "Task not found in trash" });
+    res.json({ success: true, message: "Task permanently deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

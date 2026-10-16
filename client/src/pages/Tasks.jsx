@@ -3,13 +3,21 @@ import DashboardLayout from "../layout/DashboardLayout.jsx";
 import TaskCard from "../components/TaskCard.jsx";
 import TaskModal from "../components/TaskModal.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
-import api from "../utils/api.js";
+import api, { TASK_LIMIT } from "../utils/api.js";
 import toast from "react-hot-toast";
-import { PlusCircle } from "lucide-react";
+import { CircleCheck, ClipboardList, Plus } from "lucide-react";
 import { ClipLoader } from "react-spinners";
+
+const filters = [
+  { value: "all", label: "All Tasks" },
+  { value: "pending", label: "Pending" },
+  { value: "completed", label: "Completed" },
+  { value: "high", label: "High Priority" },
+];
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -20,8 +28,9 @@ export default function Tasks() {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/todos");
+      const res = await api.get("/todos", { params: { limit: TASK_LIMIT } });
       setTasks(res.data.tasks || []);
+      setActiveFilter("all"); // list now shows all tasks, keep the tab in sync
     } catch (err) {
       console.error("Error fetching todos:", err);
       toast.error("Failed to fetch tasks");
@@ -32,6 +41,7 @@ export default function Tasks() {
 
   // ---------------- Filter Tasks ----------------
   const fetchTasksBy = async (filter) => {
+    setActiveFilter(filter);
     setLoading(true);
     try {
       let url = "/todos";
@@ -40,7 +50,7 @@ export default function Tasks() {
       else if (filter === "pending") url = "/todos?completed=false";
       else if (filter === "high") url = "/todos?priority=high";
 
-      const res = await api.get(url);
+      const res = await api.get(url, { params: { limit: TASK_LIMIT } });
       setTasks(res.data.tasks || []);
     } catch {
       toast.error("Failed to apply filter");
@@ -104,7 +114,7 @@ export default function Tasks() {
       // 2️⃣ API update
       await api.put(`/todos/${task._id}`, { completed: updated });
       toast.success(updated ? "Task completed!" : "Marked as pending");
-    } catch (err) {
+    } catch {
       toast.error("Failed to update status");
 
       // 3️⃣ Revert UI if failed
@@ -139,14 +149,41 @@ export default function Tasks() {
   return (
     <DashboardLayout>
       {/* ---------- Header ---------- */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">My Tasks</h1>
-        <div className="flex gap-3">
-          <button
-            onClick={markAllCompleted}
-            className="border border-primary text-primary px-3 py-2 rounded-lg hover:bg-indigo-50"
-          >
-            Mark All Completed
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-ink">My Tasks</h1>
+        <p className="mt-1 text-ink-muted">Manage and organize your tasks efficiently.</p>
+      </div>
+
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        {/* ---------- Filters ---------- */}
+        <div className="flex flex-wrap gap-2">
+          {filters.map((filter) => {
+            const isActive = activeFilter === filter.value;
+            return (
+              <button
+                key={filter.value}
+                onClick={() => fetchTasksBy(filter.value)}
+                aria-pressed={isActive}
+                className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-light/40 ${
+                  isActive
+                    ? "border-brand/40 bg-brand/20 text-ink"
+                    : "border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink"
+                }`}
+              >
+                {filter.label}
+                {isActive && !loading && (
+                  <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-xs">
+                    {(tasks || []).length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button onClick={markAllCompleted} className="btn-ghost">
+            <CircleCheck size={18} /> Mark All Completed
           </button>
 
           <button
@@ -154,35 +191,28 @@ export default function Tasks() {
               setModalOpen(true);
               setSelectedTask(null);
             }}
-            className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-600"
+            className="btn-primary"
           >
-            <PlusCircle size={18} /> Add Task
+            <Plus size={18} /> Add Task
           </button>
         </div>
       </div>
 
-      {/* ---------- Filters ---------- */}
-      <div className="mb-4 flex items-center gap-3">
-        <select
-          onChange={(e) => fetchTasksBy(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 focus:outline-primary"
-        >
-          <option value="all">All Tasks</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-          <option value="high">High Priority</option>
-        </select>
-      </div>
-
       {/* ---------- Task List ---------- */}
       {loading ? (
-        <div className="flex justify-center mt-10">
-          <ClipLoader color="#6366F1" size={40} />
+        <div className="flex justify-center mt-16">
+          <ClipLoader color="#A78BFA" size={40} />
         </div>
       ) : (tasks || []).length === 0 ? (
-        <p className="text-gray-500 text-center mt-10">No tasks found.</p>
+        <div className="card flex flex-col items-center px-6 py-16 text-center">
+          <div className="icon-tile mb-4 h-14 w-14 text-brand-light">
+            <ClipboardList size={26} />
+          </div>
+          <p className="font-medium text-ink">No tasks found.</p>
+          <p className="mt-1 text-sm text-ink-subtle">Try another filter or add a new task.</p>
+        </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {(tasks || []).map((task) => (
             <TaskCard
               key={task._id}
@@ -202,12 +232,15 @@ export default function Tasks() {
       )}
 
       {/* ---------- Modals ---------- */}
-      <TaskModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSave={handleSave}
-        existingTask={selectedTask}
-      />
+      {/* Mounted only while open, so the form always starts from the selected task */}
+      {modalOpen && (
+        <TaskModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSave}
+          existingTask={selectedTask}
+        />
+      )}
 
       <ConfirmModal
         isOpen={confirmOpen}

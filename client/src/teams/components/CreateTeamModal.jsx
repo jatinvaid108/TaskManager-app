@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { Search, X } from "lucide-react";
+import { ClipLoader } from "react-spinners";
 import { createTeam, searchUsers } from "../api/teamApi";
+import Avatar from "../../components/Avatar.jsx";
 import toast from "react-hot-toast";
 
 export default function CreateTeamModal({ onClose, onCreated }) {
@@ -8,6 +11,7 @@ export default function CreateTeamModal({ onClose, onCreated }) {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMembers, setSelectedMembers] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   const handleSearch = async (value) => {
     setQuery(value);
@@ -35,6 +39,7 @@ export default function CreateTeamModal({ onClose, onCreated }) {
       return;
     }
 
+    setSaving(true);
     try {
       await createTeam({
         name,
@@ -45,80 +50,114 @@ export default function CreateTeamModal({ onClose, onCreated }) {
       toast.success("Team created");
       onCreated();
       onClose();
-    } catch (err) {
+    } catch {
       toast.error("Failed to create team");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-      <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="card max-h-[90vh] w-full max-w-md overflow-y-auto p-6 shadow-2xl shadow-black/50 sm:p-7">
 
-        <h2 className="text-xl font-semibold mb-4">Create Team</h2>
+        <h2 className="mb-5 text-xl font-semibold text-ink">Create Team</h2>
 
-        <input
-          className="w-full border p-2 rounded mb-2"
-          placeholder="Team name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div className="space-y-4">
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-ink-muted">Team name</span>
+            <input
+              className="input"
+              placeholder="e.g. Frontend devs"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
 
-        <textarea
-          className="w-full border p-2 rounded mb-2"
-          placeholder="Description"
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
-        />
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-ink-muted">Description</span>
+            <textarea
+              className="input resize-none"
+              rows={3}
+              placeholder="What is this team working on?"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+            />
+          </label>
 
-        {/* Search Users */}
-        <input
-          className="w-full border p-2 rounded mb-2"
-          placeholder="Search users by email"
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
+          {/* Search Users */}
+          <div>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-ink-muted">Add members</span>
+              <span className="relative block">
+                <Search
+                  size={16}
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-subtle"
+                />
+                <input
+                  className="input pl-10"
+                  placeholder="Search users by email"
+                  value={query}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </span>
+            </label>
+            <p className="mt-1.5 px-1 text-xs text-ink-subtle">Type at least 2 characters.</p>
 
-        {searchResults.length > 0 && (
-          <div className="border rounded mb-2 p-2 max-h-40 overflow-y-auto">
-            {searchResults.map((user) => (
-              <div
-                key={user._id}
-                onClick={() => addMember(user)}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
-              >
-                {user.name} — {user.email}
+            {searchResults.length > 0 && (
+              <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-line bg-surface-raised p-1">
+                {searchResults.map((user) => (
+                  <button
+                    type="button"
+                    key={user._id}
+                    onClick={() => addMember(user)}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-surface-hover"
+                  >
+                    <Avatar name={user.name} id={user._id} size="sm" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm text-ink">{user.name}</span>
+                      <span className="block truncate text-xs text-ink-muted">{user.email}</span>
+                    </span>
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
 
-        {/* Selected Members */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {selectedMembers.map((m) => (
-            <div
-              key={m._id}
-              className="bg-indigo-100 px-3 py-1 rounded-full flex items-center gap-2"
-            >
-              {m.name}
-              <button
-                onClick={() => removeMember(m._id)}
-                className="text-red-500 font-bold"
-              >
-                ×
-              </button>
+          {/* Selected Members */}
+          {selectedMembers.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedMembers.map((m) => (
+                <div
+                  key={m._id}
+                  className="flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 py-1 pl-1 pr-2 text-sm text-ink"
+                >
+                  <Avatar name={m.name} id={m._id} size="sm" className="h-6 w-6" />
+                  {m.name}
+                  <button
+                    type="button"
+                    onClick={() => removeMember(m._id)}
+                    aria-label={`Remove ${m.name}`}
+                    className="rounded-full p-0.5 text-ink-muted transition-colors hover:bg-red-500/10 hover:text-red-400"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
 
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200">
+        <div className="mt-6 flex justify-end gap-3">
+          <button onClick={onClose} className="btn-ghost">
             Cancel
           </button>
           <button
             onClick={handleCreate}
-            className="px-4 py-2 rounded bg-indigo-600 text-white"
+            disabled={saving}
+            className="btn-primary min-w-[96px]"
           >
-            Create
+            {saving ? <ClipLoader color="#fff" size={16} /> : "Create"}
           </button>
         </div>
       </div>

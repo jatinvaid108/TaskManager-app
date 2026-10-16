@@ -1,5 +1,5 @@
 import express from "express";
-import { createTodo, getTodos, getTodoById, updateTodo, deleteTodo, restoreTodo, markAllCompleted,restoreAll,assignTask,unassignTask } from "../controllers/todoController.js";
+import { createTodo, getTodos, getTodoById, updateTodo, deleteTodo, restoreTodo, markAllCompleted,restoreAll,assignTask,unassignTask,permanentDeleteTodo } from "../controllers/todoController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -19,6 +19,8 @@ router.put("/restore/:id", restoreTodo);
 
 router.put("/:id/assign", assignTask);
 router.put("/:id/unassign", unassignTask);
+
+router.delete("/:id/permanent", permanentDeleteTodo);
 
 router.get("/:id", getTodoById);
 router.put("/:id", updateTodo);

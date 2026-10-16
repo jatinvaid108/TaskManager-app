@@ -6,6 +6,7 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Tasks from "./pages/Tasks.jsx";
 import Trash from "./pages/Trash.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 
 // ------------------------------>Admin Routes
@@ -97,7 +98,8 @@ function App() {
         }
       />
 
-
+      {/* Any unknown URL */}
+      <Route path="*" element={<NotFound />} />
 
     </Routes>
 

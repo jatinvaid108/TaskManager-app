@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Search } from "lucide-react";
 import { searchUsers, addMember } from "../api/teamApi";
+import Avatar from "../../components/Avatar.jsx";
 import toast from "react-hot-toast";
 
 export default function AddMemberModal({ teamId, onClose, onAdded }) {
@@ -25,35 +27,53 @@ export default function AddMemberModal({ teamId, onClose, onAdded }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex justify-center items-center p-4">
-      <div className="bg-white p-6 rounded shadow w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="card max-h-[90vh] w-full max-w-md overflow-y-auto p-6 shadow-2xl shadow-black/50 sm:p-7">
 
-        <h2 className="text-xl font-semibold mb-4">Add Member</h2>
+        <h2 className="text-xl font-semibold text-ink">Add Member</h2>
+        <p className="mb-5 mt-1 text-sm text-ink-muted">Search by email, then select a user to add.</p>
 
-        <input
-          type="text"
-          placeholder="Search email..."
-          className="border p-2 w-full rounded mb-3"
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
+        <label className="block">
+          <span className="sr-only">Search email</span>
+          <span className="relative block">
+            <Search
+              size={16}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-subtle"
+            />
+            <input
+              type="text"
+              placeholder="Search email..."
+              className="input pl-10"
+              value={query}
+              onChange={(e) => handleSearch(e.target.value)}
+              autoFocus
+            />
+          </span>
+        </label>
+        <p className="mt-1.5 px-1 text-xs text-ink-subtle">Type at least 2 characters.</p>
 
-        <div className="max-h-40 overflow-y-auto border rounded mb-4">
-          {results.map((u) => (
-            <div
-              key={u._id}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleAdd(u._id)}
-            >
-              <p className="font-medium">{u.name}</p>
-              <p className="text-sm text-gray-600">{u.email}</p>
-            </div>
-          ))}
-        </div>
+        {results.length > 0 && (
+          <div className="mt-3 max-h-52 overflow-y-auto rounded-xl border border-line bg-surface-raised p-1">
+            {results.map((u) => (
+              <button
+                type="button"
+                key={u._id}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-surface-hover"
+                onClick={() => handleAdd(u._id)}
+              >
+                <Avatar name={u.name} id={u._id} size="sm" />
+                <span className="min-w-0">
+                  <span className="block truncate font-medium text-ink">{u.name}</span>
+                  <span className="block truncate text-sm text-ink-muted">{u.email}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <button
           onClick={onClose}
-          className="bg-gray-300 px-4 py-2 rounded w-full"
+          className="btn-ghost mt-6 w-full"
         >
           Close
         </button>
